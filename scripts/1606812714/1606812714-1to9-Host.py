@@ -317,7 +317,7 @@ def test_execution():
     itp_ctrl("open")
     result = test_msr(id=0x35)
     itp_ctrl("close")
-    result = "{0:64b}".format(result)
+    result = "{0:064b}".format(result)
     core_count = int(result[-32:-16], 2)
     thread_count = int(result[-16:], 2)
     print(result, core_count, thread_count, core_count == logical_cores, thread_count == max_active_thread)
@@ -327,7 +327,7 @@ def test_execution():
     msr_981_core_0 = test_itp_msr(id=0x981, idx=0)
     msr_981_core_max = test_itp_msr(id=0x981, idx=(max_active_thread-1))
     itp_ctrl("close")
-    r_bin = "{0:64b}".format(msr_981_core_0)
+    r_bin = "{0:064b}".format(msr_981_core_0)
     log_write("INFO", "MSR Info: thread 0 0x981: %s, thread max 0x981: %s, thread 0 binary converted: %s" % (msr_981_core_0, msr_981_core_max, r_bin))
     # itp.threads[0].msr(0x981) same result withitp.threads[max_thread].msr(0x981)
     # Bit 0 of 0x981 must be 1 indicating support for AES-XTS 128 bit encryption algorithm
@@ -335,14 +335,14 @@ def test_execution():
     # Number of bits which can be allocated for usage as key identifiers for multi-keymemory encryption.
     # If bits [35:32] are zero, MK-TME is not supported, Stop the test execution.
     # Bits [50:36] indicates the maximum number of keys that are available for usage. If bits [50:36] are zero, MK-TME is not supported, Stop the test execution
-    result = [msr_981_core_0 == msr_981_core_max, "1" in r_bin[-1], "1" in r_bin[-36:-32], "1" in r_bin[-51:-36]]
+    result = [msr_981_core_0 == msr_981_core_max, "1" == r_bin[-1], "1" in r_bin[-36:-32], "1" in r_bin[-51:-36]]
     result_process(False not in result, "Check the value of IA32_TME_CAPABILITY MSR 0x981", test_exit=True, is_step_complete=True)
 
     itp_ctrl("open")
     msr_982_core_0 = test_itp_msr(id=0x982, idx=0)
     msr_982_core_max = test_itp_msr(id=0x982, idx=(max_active_thread-1))
     itp_ctrl("close")
-    r_bin = "{0:64b}".format(msr_982_core_0)
+    r_bin = "{0:064b}".format(msr_982_core_0)
     log_write("INFO", "MSR Info: thread 0 0x982: %s, thread max 0x982: %s, thread 0 binary converted: %s" % (msr_982_core_0, msr_982_core_max, r_bin))
     # itp.threads[0].msr(0x982) same result with itp.threads[max_thread].msr(0x982)
     # Bit 0 should be 1 indicating Lock being set
@@ -352,8 +352,8 @@ def test_execution():
     # Bits [7:4] should be 0000, indicating support for 128 bit AES-XTS algorithm
     # Bits [35:32] indicate the number of bits that can be allocated for usage as KeyIDs for MK-TME. If bits [35:32] are zero, MK-TME is not supported, Stop the test execution
     # Bit 48 should be 1 indicating the crpto algorithm AES 128 shall be used for encryption
-    result = [msr_982_core_0 == msr_982_core_max, "1" in r_bin[-1], "1" in r_bin[-2], "0" in r_bin[-3], "1" in r_bin[-4], "1" not in r_bin[-8:-4],
-              "1" in r_bin[-36:-32], "1" in r_bin[-49]]
+    result = [msr_982_core_0 == msr_982_core_max, "1" == r_bin[-1], "1" == r_bin[-2], "0" == r_bin[-3], "1" == r_bin[-4], "1" not in r_bin[-8:-4],
+              "1" in r_bin[-36:-32], "1" == r_bin[-49]]
     result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982", test_exit=True, is_step_complete=True)
 
     test_max_mktme_keys_get(verdict=max_mktme_keys)

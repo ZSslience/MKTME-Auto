@@ -525,7 +525,7 @@ def test_execution():
     itp_ctrl("open")
     result = test_msr(id=0x35)
     itp_ctrl("close")
-    result = "{0:64b}".format(result)
+    result = "{0:064b}".format(result)
     core_count = int(result[-32:-16], 2)
     thread_count = int(result[-16:], 2)
     print(result, core_count, thread_count, core_count == logical_cores, thread_count == max_active_thread)
@@ -535,7 +535,7 @@ def test_execution():
     msr_983_core_0 = test_itp_msr(id=0x983, idx=0)
     msr_983_core_max = test_itp_msr(id=0x983, idx=(max_active_thread-1))
     itp_ctrl("close")
-    r_bin = "{0:64b}".format(msr_983_core_0)
+    r_bin = "{0:064b}".format(msr_983_core_0)
     log_write("INFO", "MSR Info: thread 0 0x983: %s, thread max 0x983: %s, thread 0 binary converted: %s" % (msr_983_core_0, msr_983_core_max, r_bin))
     result = [msr_983_core_0 == msr_983_core_max, "1" not in r_bin]
     result_process(False not in result, "Check the value of ACTIVATION MSR 0x983", test_exit=True, is_step_complete=True)
@@ -544,7 +544,7 @@ def test_execution():
     msr_984_core_0 = test_itp_msr(id=0x984, idx=0)
     msr_984_core_max = test_itp_msr(id=0x984, idx=(max_active_thread-1))
     itp_ctrl("close")
-    r_bin = "{0:64b}".format(msr_984_core_0)
+    r_bin = "{0:064b}".format(msr_984_core_0)
     log_write("INFO", "MSR Info: thread 0 0x984: %s, thread max 0x984: %s, thread 0 binary converted: %s" % (msr_984_core_0, msr_984_core_max, r_bin))
     result = [msr_984_core_0 == msr_984_core_max, "1" not in r_bin]
     result_process(False not in result, "Check the value of ACTIVATION MSR 0x984", test_exit=True, is_step_complete=True)
@@ -558,9 +558,9 @@ def test_execution():
     msr_984_core_0 = test_itp_msr(id=0x984, idx=0)
     msr_984_core_max = test_itp_msr(id=0x984, idx=(max_active_thread-1))
     itp_ctrl("close")
-    r_bin = "{0:64b}".format(msr_984_core_0)
+    r_bin = "{0:064b}".format(msr_984_core_0)
     log_write("INFO", "MSR Info: thread 0 0x984: %s, thread max 0x984: %s, thread 0 binary converted: %s" % (msr_984_core_0, msr_984_core_max, r_bin))
-    result = [msr_984_core_0 == msr_984_core_max, "1" == r_bin[-13]]
+    result = [msr_984_core_0 == msr_984_core_max, "1000000000000" == r_bin[-13:]]
     print(result)
     result_process(False not in result, "Check the value of ACTIVATION MSR 0x984", test_exit=True, is_step_complete=True)
 
@@ -568,9 +568,9 @@ def test_execution():
     msr_983_core_0 = test_itp_msr(id=0x983, idx=0)
     msr_983_core_max = test_itp_msr(id=0x983, idx=(max_active_thread-1))
     itp_ctrl("close")
-    r_bin = "{0:64b}".format(msr_983_core_0)
+    r_bin = "{0:064b}".format(msr_983_core_0)
     log_write("INFO", "MSR Info: thread 0 0x983: %s, thread max 0x983: %s, thread 0 binary converted: %s" % (msr_983_core_0, msr_983_core_max, r_bin))
-    result = [msr_983_core_0 == msr_983_core_max, "1000000000000" == r_bin[-12]]
+    result = [msr_983_core_0 == msr_983_core_max, "0xFFFFFFFFFF800" in str(msr_983_core_0), "1" == r_bin[-12]]
     result_process(False not in result, "Check the value of ACTIVATION MSR 0x983", test_exit=True, is_step_complete=True)
     
     result_process(True, "Now, Power down the System to plug in the CR Dimms available as per Whitley-pdg memory population rule like DRAM + BPS(128G): 1+ 1 configuration: Already configured in bench")
@@ -582,9 +582,9 @@ def test_execution():
     msr_984_core_0 = test_itp_msr(id=0x984, idx=0)
     msr_984_core_max = test_itp_msr(id=0x984, idx=(max_active_thread-1))
     itp_ctrl("close")
-    r_bin = "{0:64b}".format(msr_984_core_0)
+    r_bin = "{0:064b}".format(msr_984_core_0)
     log_write("INFO", "MSR Info: thread 0 0x984: %s, thread max 0x984: %s, thread 0 binary converted: %s" % (msr_984_core_0, msr_984_core_max, r_bin))
-    result = [msr_984_core_0 == msr_984_core_max, "1" == r_bin[-14]]
+    result = [msr_984_core_0 == msr_984_core_max, "10000000000000" == r_bin[-14:]]
     print(result)
     result_process(False not in result, "Check the value of ACTIVATION MSR 0x984", test_exit=True, is_step_complete=True)
 
@@ -592,9 +592,9 @@ def test_execution():
     msr_983_core_0 = test_itp_msr(id=0x983, idx=0)
     msr_983_core_max = test_itp_msr(id=0x983, idx=(max_active_thread-1))
     itp_ctrl("close")
-    r_bin = "{0:64b}".format(msr_983_core_0)
+    r_bin = "{0:064b}".format(msr_983_core_0)
     log_write("INFO", "MSR Info: thread 0 0x983: %s, thread max 0x983: %s, thread 0 binary converted: %s" % (msr_983_core_0, msr_983_core_max, r_bin))
-    result = [msr_983_core_0 == msr_983_core_max, "0x000FFFFFFFFFE800" in str(msr_983_core_0)]
+    result = [msr_983_core_0 == msr_983_core_max, "0x000FFFFFFFFFE800" in str(msr_983_core_0), "1" == r_bin[-12]]
     print(result)
     result_process(False not in result, "Check the value of ACTIVATION MSR 0x983", test_exit=True, is_step_complete=True)
     
