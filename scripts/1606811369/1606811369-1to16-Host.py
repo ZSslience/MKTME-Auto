@@ -13,8 +13,7 @@ from MiddleWare.lib_bios_config import BiosMenuConfig
 from SoftwareAbstractionLayer import utils
 from SoftwareAbstractionLayer import library
 from SoftwareAbstractionLayer import lib_constants
-from SoftwareAbstractionLayer import sal_remote_fetch
-from SoftwareAbstractionLayer import sal_pstools
+
 
 # 1606811369 [PreSi & PostSi][MKTME] To Check if MKTME is able to exclude addresses.
 # rev.26

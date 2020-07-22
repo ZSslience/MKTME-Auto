@@ -1,4 +1,3 @@
-import os
 import sys
 import time
 import threading
@@ -11,8 +10,7 @@ from MiddleWare.lib_bios_config import BiosMenuConfig
 from SoftwareAbstractionLayer import utils
 from SoftwareAbstractionLayer import library
 from SoftwareAbstractionLayer import lib_constants
-from SoftwareAbstractionLayer import sal_remote_fetch
-from SoftwareAbstractionLayer import sal_pstools
+
 
 # 1606808045 [PostSi & PreSi]To validate Bios write 0 to CORE_MKTME_ACTIVATION to trigger ucode
 # rev.28

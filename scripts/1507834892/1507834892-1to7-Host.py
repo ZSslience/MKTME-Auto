@@ -1,4 +1,3 @@
-import os
 import sys
 import time
 import threading
@@ -11,8 +10,7 @@ from MiddleWare.lib_bios_config import BiosMenuConfig
 from SoftwareAbstractionLayer import utils
 from SoftwareAbstractionLayer import library
 from SoftwareAbstractionLayer import lib_constants
-from SoftwareAbstractionLayer import sal_remote_fetch
-from SoftwareAbstractionLayer import sal_pstools
+
 
 # 1507834892 [Pre-Si & Post-Si] Verify GV is disabled when TME is enable
 # rev.18

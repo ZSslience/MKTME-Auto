@@ -13,8 +13,7 @@ from MiddleWare.lib_bios_config import BiosMenuConfig
 from SoftwareAbstractionLayer import utils
 from SoftwareAbstractionLayer import library
 from SoftwareAbstractionLayer import lib_constants
-from SoftwareAbstractionLayer import sal_remote_fetch
-from SoftwareAbstractionLayer import sal_pstools
+
 
 # 1507268867 [PreSi & PostSi][Security][MKTME] Detect EFI_MEMORY_CPU_CRYPTO can encrypt memory when MKTME enabled.
 # rev.26

@@ -13,8 +13,7 @@ from MiddleWare.lib_bios_config import BiosMenuConfig
 from SoftwareAbstractionLayer import utils
 from SoftwareAbstractionLayer import library
 from SoftwareAbstractionLayer import lib_constants
-from SoftwareAbstractionLayer import sal_remote_fetch
-from SoftwareAbstractionLayer import sal_pstools
+
 
 # 1507927027 [PSS  Post-Si][MKTME] TME_MKTME and AppDirect can not be existed mutually
 # rev.18

@@ -1,4 +1,3 @@
-import os
 import sys
 import time
 import threading
@@ -12,8 +11,7 @@ from MiddleWare.lib_bios_config import BiosMenuConfig
 from SoftwareAbstractionLayer import utils
 from SoftwareAbstractionLayer import library
 from SoftwareAbstractionLayer import lib_constants
-from SoftwareAbstractionLayer import sal_remote_fetch
-from SoftwareAbstractionLayer import sal_pstools
+
 
 # 1606806788 [Pre-Si & PostS-i]No MKTME Error Code should be displayed in the BIOS Logs for boot without MKTME BIOS flow error cases.
 # rev.15
