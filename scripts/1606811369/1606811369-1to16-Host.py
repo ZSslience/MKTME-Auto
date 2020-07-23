@@ -538,6 +538,7 @@ def test_execution():
     r_bin = "{0:064b}".format(msr_983_core_0)
     log_write("INFO", "MSR Info: thread 0 0x983: %s, thread max 0x983: %s, thread 0 binary converted: %s" % (msr_983_core_0, msr_983_core_max, r_bin))
     result = [msr_983_core_0 == msr_983_core_max, "1" not in r_bin]
+    print(result)
     result_process(False not in result, "Check the value of ACTIVATION MSR 0x983", test_exit=True, is_step_complete=True)
 
     itp_ctrl("open")
@@ -547,6 +548,7 @@ def test_execution():
     r_bin = "{0:064b}".format(msr_984_core_0)
     log_write("INFO", "MSR Info: thread 0 0x984: %s, thread max 0x984: %s, thread 0 binary converted: %s" % (msr_984_core_0, msr_984_core_max, r_bin))
     result = [msr_984_core_0 == msr_984_core_max, "1" not in r_bin]
+    print(result)
     result_process(False not in result, "Check the value of ACTIVATION MSR 0x984", test_exit=True, is_step_complete=True)
 
     test_dimm_mngment()
@@ -570,7 +572,8 @@ def test_execution():
     itp_ctrl("close")
     r_bin = "{0:064b}".format(msr_983_core_0)
     log_write("INFO", "MSR Info: thread 0 0x983: %s, thread max 0x983: %s, thread 0 binary converted: %s" % (msr_983_core_0, msr_983_core_max, r_bin))
-    result = [msr_983_core_0 == msr_983_core_max, "0xFFFFFFFFFF800" in str(msr_983_core_0), "1" == r_bin[-12]]
+    result = [msr_983_core_0 == msr_983_core_max, "0x000FFFFFFFFFF800" in str(msr_983_core_0), "1" == r_bin[-12]]
+    print(result)
     result_process(False not in result, "Check the value of ACTIVATION MSR 0x983", test_exit=True, is_step_complete=True)
     
     result_process(True, "Now, Power down the System to plug in the CR Dimms available as per Whitley-pdg memory population rule like DRAM + BPS(128G): 1+ 1 configuration: Already configured in bench")
