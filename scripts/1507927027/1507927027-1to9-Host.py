@@ -572,7 +572,7 @@ def test_execution():
     boot_dimminfo_table, boot_sad_table = test_boot_dimm_table_parse(tme_dis_appdirect_buffer)
     result_dimm = len([i for i in boot_dimminfo_table if "DIMM: Intel" in i])
     result_sad = len([i for i in boot_sad_table if "PMEM" in i])
-    result_process((result_sad != 0), "TME/MK-TME Disabled: CR dimms are PMem not listed in SAD Table", test_exit=True, is_step_complete=True)
+    result_process((result_sad != 0), "TME/MK-TME Disabled: PMem are listed in SAD Table", test_exit=True, is_step_complete=True)
 
     test_tme_set(complete=False)
     test_mktme_set(complete=False)
