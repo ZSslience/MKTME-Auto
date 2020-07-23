@@ -59,6 +59,9 @@ def result_process(result, step_string, test_exit=False, is_step_complete=True):
 
             library.write_log(lib_constants.LOG_FAIL, "Failed to %s" % step_string,
                               TEST_CASE_ID, SCRIPT_ID)
+        print("STEP_NO: %s, IS_CASE_PASS: %s" % (str(STEP_NO), str(IS_CASE_PASS)))
+        print("FAIL_COLLECT:")
+        print(FAIL_COLLECT)
         if test_exit:
             sys.exit(lib_constants.EXIT_FAILURE)
     else:
