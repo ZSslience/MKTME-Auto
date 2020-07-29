@@ -50,15 +50,18 @@ def result_process(result, step_string, test_exit=False, is_step_complete=True):
         global IS_CASE_PASS
         IS_CASE_PASS = False
         if is_step_complete:
+            print('#' * 160)
             library.write_log(lib_constants.LOG_FAIL, "Step %d: Failed to %s" % (STEP_NO, step_string),
                               TEST_CASE_ID, SCRIPT_ID)
+            print('#' * 160)
             global FAIL_COLLECT
             FAIL_COLLECT.append((STEP_NO, step_string))
             STEP_NO += 1
         else:
-
+            print('#' * 160)
             library.write_log(lib_constants.LOG_FAIL, "Failed to %s" % step_string,
                               TEST_CASE_ID, SCRIPT_ID)
+            print('#' * 160)
         print("STEP_NO: %s, IS_CASE_PASS: %s" % (str(STEP_NO), str(IS_CASE_PASS)))
         print("FAIL_COLLECT:")
         print(FAIL_COLLECT)
@@ -66,12 +69,16 @@ def result_process(result, step_string, test_exit=False, is_step_complete=True):
             sys.exit(lib_constants.EXIT_FAILURE)
     else:
         if is_step_complete:
+            print('#' * 160)
             library.write_log(lib_constants.LOG_INFO, "Step %d: Succeed to %s" % (STEP_NO, step_string),
                               TEST_CASE_ID, SCRIPT_ID)
+            print('#' * 160)
             STEP_NO += 1
         else:
+            print('#' * 160)
             library.write_log(lib_constants.LOG_INFO, "Succeed to %s" % step_string,
                               TEST_CASE_ID, SCRIPT_ID)
+            print('#' * 160)
 
 
 def log_write(result, info):
