@@ -362,6 +362,8 @@ def test_memmap_parse(log_file, query_string):
         search_string = r'(.*) (.*)-(.*) (.*) (.*)'
         ret_list = list(filter(lambda x: re.match(search_string, x) is not None, data))
         ret_index = [ret_list.index(i) for i in ret_list if query_string in i]
+        if len(ret_index) == 0:
+            return None, len(ret_list), ret_list
         return ret_index[-1], len(ret_list), ret_list
 
 
@@ -435,9 +437,13 @@ def test_execution():
     log_file = usb_drive_label + log_file_name
     # log_file = r'X:\1507268867_Step_1.log'
     last_index, matched_length, matched_list = test_memmap_parse(log_file, "8000F")
-    print(matched_list[last_index + 1])
-    print(last_index, matched_length)
-    result_process("Reserved" in matched_list[last_index + 1] , "The Attributes should be xxxxxxxxxxxx8000F if MEMORY_CPU_CRYPTO is set", test_exit=True, is_step_complete=True)
+    if not last_index:
+        result = False
+    else:
+        print(matched_list[last_index + 1])
+        print(last_index, matched_length)
+        result = "Reserved" in matched_list[last_index + 1]
+    result_process(result, "The Attributes should be xxxxxxxxxxxx8000F if MEMORY_CPU_CRYPTO is set", test_exit=True, is_step_complete=True)
 
     bios_conf.exit_efi_shell_to_bios()
 
@@ -450,9 +456,13 @@ def test_execution():
     log_file = usb_drive_label + log_file_name
     # log_file = r'X:\1507268867_Step_1.log'
     last_index, matched_length, matched_list = test_memmap_parse(log_file, "000000000000000F")
-    print(matched_list[last_index + 1])
-    print(last_index, matched_length)
-    result_process("Reserved" in matched_list[last_index + 1], "The Attributes should be 000000000000000F if MEMORY_CPU_CRYPTO is not set", test_exit=True, is_step_complete=True)
+    if not last_index:
+        result = False
+    else:
+        print(matched_list[last_index + 1])
+        print(last_index, matched_length)
+        result = "Reserved" in matched_list[last_index + 1]
+    result_process(result, "The Attributes should be 000000000000000F if MEMORY_CPU_CRYPTO is not set", test_exit=True, is_step_complete=True)
 
 
 if __name__ == "__main__":
