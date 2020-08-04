@@ -61,11 +61,4 @@
         <Arguments>./scripts/1606812714/1606812714.py</Arguments>
         <IsEvent>false</IsEvent>
     </TestCase>
-    <TestCase>
-        <PackageName>HTML_Log</PackageName>
-        <TestCaseName>HTML Log Creation</TestCaseName>
-        <Command>python</Command>
-        <Arguments>./csv_to_html_convert.py</Arguments>
-        <IsEvent>false</IsEvent>
-    </TestCase>
 </TestCases>
