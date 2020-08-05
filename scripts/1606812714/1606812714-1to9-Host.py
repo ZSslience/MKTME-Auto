@@ -290,6 +290,19 @@ def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration ->
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
 
 
+def disable_pa46bits(value="Disable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Limit CPU PA to 46 bits", complete=False):
+    boot_state = is_boot_state()
+    if boot_state == 'bios':
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
+        result = bios_conf.bios_opt_drop_down_menu_select('Limit CPU PA to 46 bits', value)
+        bios_conf.bios_save_changes()
+        bios_conf.bios_back_home()
+        result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
+    else:
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True,
+                       is_step_complete=complete)
+
+
 def callback_logging():
     result_process(False, "Test case execution terminated due to timeout occurred", test_exit=True, is_step_complete=False)
 
@@ -319,6 +332,7 @@ def test_execution():
     test_aesni_set()
     test_tme_set()
     test_mktme_set()
+    disable_pa46bits()
     test_bios_reset(complete=False)
     result_process(True, "Skipped on ICX-SP ICX-D: Goto BIOS setup, change following setting to 16T EDKII -> Socket Configuration -> Common RefCode Configuration ->MMIO High Base:16T", test_exit=True, is_step_complete=True)
 
