@@ -290,7 +290,7 @@ def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration ->
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
 
 
-def disable_pa46bits(value="Disable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Limit CPU PA to 46 bits", complete=False):
+def disable_limit_pa46bits(value="Disable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Limit CPU PA to 46 bits", complete=False):
     boot_state = is_boot_state()
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
@@ -332,7 +332,7 @@ def test_execution():
     test_aesni_set()
     test_tme_set()
     test_mktme_set()
-    disable_pa46bits()
+    disable_limit_pa46bits()
     test_bios_reset(complete=False)
     result_process(True, "Skipped on ICX-SP ICX-D: Goto BIOS setup, change following setting to 16T EDKII -> Socket Configuration -> Common RefCode Configuration ->MMIO High Base:16T", test_exit=True, is_step_complete=True)
 
