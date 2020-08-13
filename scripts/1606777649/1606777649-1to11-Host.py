@@ -38,18 +38,18 @@ def result_process(result, step_string, test_exit=False, is_step_complete=True):
         global IS_CASE_PASS
         IS_CASE_PASS = False
         if is_step_complete:
-            print('#' * 80)
+            print('#' * 160)
             library.write_log(lib_constants.LOG_FAIL, "Step %d: Failed to %s" % (STEP_NO, step_string),
                               TEST_CASE_ID, SCRIPT_ID)
-            print('#' * 80)
+            print('#' * 160)
             global FAIL_COLLECT
             FAIL_COLLECT.append((STEP_NO, step_string))
             STEP_NO += 1
         else:
-            print('#' * 80)
+            print('#' * 160)
             library.write_log(lib_constants.LOG_FAIL, "Failed to %s" % step_string,
                               TEST_CASE_ID, SCRIPT_ID)
-            print('#' * 80)
+            print('#' * 160)
         if test_exit:
             sys.exit(lib_constants.EXIT_FAILURE)
         else:
@@ -258,7 +258,7 @@ def test_execution():
     result = test_cpuid(id=0x80000008, idx=0, step_string="Reading CPUID EAX", complete=False)
     r_bin = "{0:064b}".format(result)
     log_write('INFO', "EAX result is %s" % r_bin)
-    result_process("1" in r_bin, "EAX is the maximum physical address: %s" % result, test_exit=False, complete=False)
+    result_process("1" in r_bin, "EAX is the maximum physical address: %s" % result, test_exit=False, is_step_complete=False)
     itp_ctrl("close")
 
     # Step 4-6: Enable TME/MKTME and reset
@@ -325,6 +325,7 @@ def test_execution():
     result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982 when disable TME", test_exit=True,
                    is_step_complete=True)
 
+    # Step 11: Enable TME but disable MKTME and check MSR 0x982
     test_tme_set()
     test_mktme_set(value="Disable")
     test_bios_reset()
