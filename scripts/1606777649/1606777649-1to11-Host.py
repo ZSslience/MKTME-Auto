@@ -185,6 +185,19 @@ def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration ->
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
 
 
+def disable_limit_pa46bits(value="Disable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Limit CPU PA to 46 bits", complete=False):
+    boot_state = is_boot_state()
+    if boot_state == 'bios':
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
+        result = bios_conf.bios_opt_drop_down_menu_select('Limit CPU PA to 46 bits', value)
+        bios_conf.bios_save_changes()
+        bios_conf.bios_back_home()
+        result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
+    else:
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True,
+                       is_step_complete=complete)
+
+
 def test_bios_reset(flag=True, step_string="Save, reset, boot to BIOS", complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
@@ -248,6 +261,7 @@ def test_execution():
     # Step 4-6: Enable TME/MKTME and reset
     test_tme_set()
     test_mktme_set()
+    disable_limit_pa46bits()
     test_bios_reset()
 
     # Step 7: Check CPU cores and threads
