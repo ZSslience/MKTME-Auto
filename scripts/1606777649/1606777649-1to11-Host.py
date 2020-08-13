@@ -255,10 +255,10 @@ def test_execution():
 
     # Step 3: read CPUDID(0x80000008, 0)
     itp_ctrl("open")
-    result = test_cpuid(id=0x80000008, idx=0, step_string="Reading CPUID EAX", complete=False)
+    result = test_cpuid(id=0x80000008, idx=0, target="eax", step_string="Reading CPUID EAX", complete=False)
     r_bin = "{0:064b}".format(result)
     log_write('INFO', "EAX result is %s" % r_bin)
-    result_process("1" in r_bin, "EAX is the maximum physical address: %s" % result, test_exit=False, is_step_complete=False)
+    result_process("1" in r_bin[-8:], "EAX is the maximum physical address: %s" % result, test_exit=False, is_step_complete=False)
     itp_ctrl("close")
 
     # Step 4-6: Enable TME/MKTME and reset
