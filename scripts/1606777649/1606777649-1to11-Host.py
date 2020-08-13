@@ -18,13 +18,16 @@ IS_CASE_PASS = True
 TEST_CASE_ID = '1606777649'
 SCRIPT_ID = '1606777649-1to11-Host.py'
 FAIL_COLLECT = []
+
+opt_wait_time = 5
+os_boot_timeout = 120
 boot_wait_timeout = 600
 f2_timeout = 15
 
 soundwave_port = utils.ReadConfig('SOUNDWAVE', 'PORT')
 ifwi_release = utils.ReadConfig('IFWI_IMAGES', 'RELEASE')
-logical_cores = int(utils.ReadConfig('1606812714', 'LOGICAL_CORES'))
-max_active_thread = int(utils.ReadConfig('1606812714', 'MAX_ACTIVE_THREAD'))
+logical_cores = int(utils.ReadConfig('1606777649', 'LOGICAL_CORES'))
+max_active_thread = int(utils.ReadConfig('1606777649', 'MAX_ACTIVE_THREAD'))
 wh = lib_wmi_handler.WmiHandler()
 bios_conf = BiosMenuConfig(TEST_CASE_ID, SCRIPT_ID)
 
