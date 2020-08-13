@@ -444,6 +444,7 @@ def test_execution():
     test_tme_set()
     test_mktme_set()
     disable_limit_pa46bits()
+    test_bios_reset()
     lpa.usb_to_sut()
     log_file_name = test_efi_command_run('memmap', 30, "Save, reset, boot to shell, run memmap", log=True)
     lpa.usb_to_host()
@@ -463,6 +464,7 @@ def test_execution():
 
     test_mktme_set(value="Disable")
     test_tme_set(value="Disable")
+    test_bios_reset()
     lpa.usb_to_sut()
     log_file_name = test_efi_command_run('memmap', 30, "Save, reset, boot to shell, run memmap", log=True)
     lpa.usb_to_host()
