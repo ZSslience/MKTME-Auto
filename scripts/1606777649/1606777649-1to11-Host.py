@@ -52,18 +52,18 @@ def result_process(result, step_string, test_exit=False, is_step_complete=True):
             print('#' * 160)
         if test_exit:
             sys.exit(lib_constants.EXIT_FAILURE)
+    else:
+        if is_step_complete:
+            print('#' * 160)
+            library.write_log(lib_constants.LOG_INFO, "Step %d: Succeed to %s" % (STEP_NO, step_string),
+                            TEST_CASE_ID, SCRIPT_ID)
+            print('#' * 160)
+            STEP_NO += 1
         else:
-            if is_step_complete:
-                print('#' * 160)
-                library.write_log(lib_constants.LOG_INFO, "Step %d: Succeed to %s" % (STEP_NO, step_string),
-                                  TEST_CASE_ID, SCRIPT_ID)
-                print('#' * 160)
-                STEP_NO += 1
-            else:
-                print('#' * 160)
-                library.write_log(lib_constants.LOG_INFO, "Succeed to %s" % step_string,
-                                  TEST_CASE_ID, SCRIPT_ID)
-                print('#' * 160)
+            print('#' * 160)
+            library.write_log(lib_constants.LOG_INFO, "Succeed to %s" % step_string,
+                                TEST_CASE_ID, SCRIPT_ID)
+            print('#' * 160)
 
 
 def log_write(result, info):
