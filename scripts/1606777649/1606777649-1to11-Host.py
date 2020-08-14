@@ -242,6 +242,7 @@ def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the lates
 
 
 def test_execution():
+    # Step1: Flash IFWI and reset
     test_flash_ifwi(ifwi_release, complete=False)
     test_boot_to_setup(step_string="Flash the latest BIOS and boot to setup menu", complete=True)
 
@@ -258,12 +259,15 @@ def test_execution():
     result = test_cpuid(id=0x80000008, idx=0, target="eax", step_string="Reading CPUID EAX", complete=False)
     r_bin = "{0:064b}".format(result)
     log_write('INFO', "EAX result is %s" % r_bin)
-    result_process("1" in r_bin[-8:], "EAX is the maximum physical address: %s" % result, test_exit=False, is_step_complete=False)
+    result_process("1" in r_bin[-8:], "EAX is the maximum physical address: %s" % result,
+                   test_exit=False, is_step_complete=True)
     itp_ctrl("close")
 
     # Step 4-6: Enable TME/MKTME and reset
     test_tme_set()
     test_mktme_set()
+    # Workaround to make MKTME work from sighting https://hsdes.intel.com/appstore/article/#/1508152249
+    # Not necessary and may be removed in future.
     disable_limit_pa46bits()
     test_bios_reset()
 
@@ -275,7 +279,8 @@ def test_execution():
     core_count = int(result[-32:-16], 2)
     thread_count = int(result[-16:], 2)
     print(result, core_count, thread_count, core_count == logical_cores, thread_count == max_active_thread)
-    result_process((core_count == logical_cores) and (thread_count == max_active_thread), "Check the number of CPU active logical processor.", test_exit=True, is_step_complete=True)
+    result_process((core_count == logical_cores) and (thread_count == max_active_thread),
+                   "Check the number of CPU active logical processor.", test_exit=True, is_step_complete=True)
 
     # Step 8: Check MSR 0x981
     itp_ctrl("open")
@@ -283,15 +288,11 @@ def test_execution():
     msr_981_core_max = test_itp_msr(id=0x981, idx=(max_active_thread-1))
     itp_ctrl("close")
     r_bin = "{0:064b}".format(msr_981_core_0)
-    log_write("INFO", "MSR Info: thread 0 0x981: %s, thread max 0x981: %s, thread 0 binary converted: %s" % (msr_981_core_0, msr_981_core_max, r_bin))
-    # itp.threads[0].msr(0x981) same result withitp.threads[max_thread].msr(0x981)
-    # Bit 0 of 0x981 must be 1 indicating support for AES-XTS 128 bit encryption algorithm
-    # Bits [35:32] indicateMK-TME Max Key ID Bits (MK_TME_MAX_KEYID_BITS):
-    # Number of bits which can be allocated for usage as key identifiers for multi-keymemory encryption.
-    # If bits [35:32] are zero, MK-TME is not supported, Stop the test execution.
-    # Bits [50:36] indicates the maximum number of keys that are available for usage. If bits [50:36] are zero, MK-TME is not supported, Stop the test execution
+    log_write("INFO", "MSR Info: thread 0 0x981: %s, thread max 0x981: %s, thread 0 binary converted: %s" % (
+                msr_981_core_0, msr_981_core_max, r_bin))
     result = [msr_981_core_0 == msr_981_core_max, "1" == r_bin[-1], "1" in r_bin[-36:-32], "1" in r_bin[-51:-36]]
-    result_process(False not in result, "Check the value of IA32_TME_CAPABILITY MSR 0x981", test_exit=True, is_step_complete=True)
+    result_process(False not in result, "Check the value of IA32_TME_CAPABILITY MSR 0x981",
+                   test_exit=True, is_step_complete=True)
 
     # Step 9: Check MSR 0x982
     itp_ctrl("open")
@@ -299,44 +300,52 @@ def test_execution():
     msr_982_core_max = test_itp_msr(id=0x982, idx=(max_active_thread-1))
     itp_ctrl("close")
     r_bin = "{0:064b}".format(msr_982_core_0)
-    log_write("INFO", "MSR Info: thread 0 0x982: %s, thread max 0x982: %s, thread 0 binary converted: %s" % (msr_982_core_0, msr_982_core_max, r_bin))
-    # itp.threads[0].msr(0x982) same result with itp.threads[max_thread].msr(0x982)
-    # Bit 0 should be 1 indicating Lock being set
-    # Bit 1 should be 1 indicating TME enabled
-    # Bit 2 should be 0, indicating a need for creation of new TME key, cold/warm reboot needed.
-    # Bit 3 should be 1 indicating key is saved into storage
-    # Bits [7:4] should be 0000, indicating support for 128 bit AES-XTS algorithm
-    # Bits [35:32] indicate the number of bits that can be allocated for usage as KeyIDs for MK-TME. If bits [35:32] are zero, MK-TME is not supported, Stop the test execution
-    # Bit 48 should be 1 indicating the crpto algorithm AES 128 shall be used for encryption
-    result = [msr_982_core_0 == msr_982_core_max, "1" == r_bin[-1], "1" == r_bin[-2], "0" == r_bin[-3], "1" == r_bin[-4], "1" not in r_bin[-8:-4],
-              "1" in r_bin[-36:-32], "1" == r_bin[-49]]
-    result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982", test_exit=True, is_step_complete=True)
+    log_write("INFO", "MSR Info: thread 0 0x982: %s, thread max 0x982: %s, thread 0 binary converted: %s" % (
+                msr_982_core_0, msr_982_core_max, r_bin))
+    result = [msr_982_core_0 == msr_982_core_max,
+              "1" == r_bin[-1], "1" == r_bin[-2],
+              "0" == r_bin[-3], "1" == r_bin[-4],
+              "1" not in r_bin[-8:-4],
+              "1" in r_bin[-36:-32],
+              "1" == r_bin[-49]]
+    result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982",
+                   test_exit=True, is_step_complete=True)
 
     # Step 10: Disable TME and check MSR 0x982
-    test_tme_set(value="Disable")
-    test_bios_reset()
+    test_tme_set(value="Disable", complete=False)
+    test_bios_reset(complete=False)
     itp_ctrl("open")
     msr_982_core_0 = test_itp_msr(id=0x982, idx=0)
     msr_982_core_max = test_itp_msr(id=0x982, idx=(max_active_thread-1))
     itp_ctrl("close")
     r_bin = "{0:064b}".format(msr_982_core_0)
-    log_write("INFO", "MSR Info: thread 0 0x982: %s, thread max 0x982: %s, thread 0 binary converted: %s" % (msr_982_core_0, msr_982_core_max, r_bin))
-    result = [msr_982_core_0 == msr_982_core_max, "1" == r_bin[-1], "0" == r_bin[-2], r_bin[-36:-32] == "0000"]
-    result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982 when disable TME", test_exit=True,
-                   is_step_complete=True)
+    log_write("INFO", "MSR Info: thread 0 0x982: %s, thread max 0x982: %s, thread 0 binary converted: %s" % (
+                msr_982_core_0, msr_982_core_max, r_bin))
+    result = [msr_982_core_0 == msr_982_core_max,
+              "1" == r_bin[-1],
+              "0" == r_bin[-2],
+              r_bin[-36:-32] == "0000"]
+    result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982 when disable TME",
+                   test_exit=True, is_step_complete=True)
 
     # Step 11: Enable TME but disable MKTME and check MSR 0x982
-    test_tme_set()
-    test_mktme_set(value="Disable")
-    test_bios_reset()
+    test_tme_set(complete=False)
+    test_mktme_set(value="Disable", complete=False)
+    test_bios_reset(complete=False)
     itp_ctrl("open")
     msr_982_core_0 = test_itp_msr(id=0x982, idx=0)
     msr_982_core_max = test_itp_msr(id=0x982, idx=(max_active_thread-1))
     itp_ctrl("close")
     r_bin = "{0:064b}".format(msr_982_core_0)
-    log_write("INFO", "MSR Info: thread 0 0x982: %s, thread max 0x982: %s, thread 0 binary converted: %s" % (msr_982_core_0, msr_982_core_max, r_bin))
-    result = [msr_982_core_0 == msr_982_core_max, "1" == r_bin[-1], "1" == r_bin[-2], r_bin[-36:-32] == "0000"]
-    result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982 when disable MKTME but enable TME", test_exit=True,
+    log_write("INFO", "MSR Info: thread 0 0x982: %s, thread max 0x982: %s, thread 0 binary converted: %s" % (
+                msr_982_core_0, msr_982_core_max, r_bin))
+    result = [msr_982_core_0 == msr_982_core_max,
+              "1" == r_bin[-1],
+              "1" == r_bin[-2],
+              r_bin[-36:-32] == "0000"]
+    result_process(False not in result,
+                   "Check the value of IA32_TME_ACTIVATE MSR 0x982 when disable MKTME but enable TME",
+                   test_exit=True,
                    is_step_complete=True)
 
 
