@@ -61,4 +61,18 @@
         <Arguments>./scripts/1606812714/1606812714.py</Arguments>
         <IsEvent>false</IsEvent>
     </TestCase>
+        <TestCase>
+        <PackageName>1606777649</PackageName>
+        <TestCaseName>1606777649</TestCaseName>
+        <Command>C:/Python36/python.exe</Command>
+        <Arguments>./scripts/1606777649/1606777649.py</Arguments>
+        <IsEvent>false</IsEvent>
+    </TestCase>
+        <TestCase>
+        <PackageName>1507269086</PackageName>
+        <TestCaseName>1507269086</TestCaseName>
+        <Command>C:/Python36/python.exe</Command>
+        <Arguments>./scripts/1507269086/1507269086.py</Arguments>
+        <IsEvent>false</IsEvent>
+    </TestCase>
 </TestCases>
