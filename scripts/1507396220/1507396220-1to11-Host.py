@@ -528,7 +528,7 @@ def test_execution():
     result_process(check_length == 0, "TME Enable: \n%s" % result, test_exit=False, is_step_complete=True)
 
     test_mktme_set(value="Enable", complete=False)
-    disable_limit_pa46bits()
+    # disable_limit_pa46bits()
     result = test_check_tme_entry()
     check_length = len([i for i in result if "not appear" in i])
     result_process((check_length == 0) and (max_tme_keys in result[1]), "MK-TME Enable: \n%s" % result, test_exit=False, is_step_complete=True)

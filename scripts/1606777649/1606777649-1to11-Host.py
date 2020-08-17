@@ -283,7 +283,7 @@ def test_execution():
     test_mktme_set()
     # Workaround to make MKTME work from sighting https://hsdes.intel.com/appstore/article/#/1508152249
     # Not necessary and may be removed in future.
-    disable_limit_pa46bits()
+    # disable_limit_pa46bits()
     test_bios_reset()
 
     # Step 7: Check CPU cores and threads

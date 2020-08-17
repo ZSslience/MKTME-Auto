@@ -566,7 +566,7 @@ def test_execution():
     test_aesni_set(complete=False)
     test_tme_set(complete=False)
     test_mktme_set(complete=False)
-    disable_limit_pa46bits()
+    # disable_limit_pa46bits()
     result_process(True, "Enable TME and MKTME by traveling the follow knobs", test_exit=True, is_step_complete=True)
 
     test_volatile_mem_mode(value="1LM", complete=False)
@@ -597,7 +597,7 @@ def test_execution():
 
     test_tme_set(complete=False)
     test_mktme_set(complete=False)
-    disable_limit_pa46bits()
+    # disable_limit_pa46bits()
     bios_conf.bios_control_key_press('CTRL_ALT_DELETE', times=1, time_out=1)
     result_process(True, "Reboot the system")
     test_capture_debug_log(complete=False)
