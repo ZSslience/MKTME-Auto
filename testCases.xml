@@ -68,11 +68,25 @@
         <Arguments>./scripts/1606777649/1606777649.py</Arguments>
         <IsEvent>false</IsEvent>
     </TestCase>
-        <TestCase>
+    <TestCase>
         <PackageName>1507269086</PackageName>
         <TestCaseName>1507269086</TestCaseName>
         <Command>C:/Python36/python.exe</Command>
         <Arguments>./scripts/1507269086/1507269086.py</Arguments>
+        <IsEvent>false</IsEvent>
+    </TestCase>
+	<TestCase>
+        <PackageName>1508145874</PackageName>
+        <TestCaseName>1508145874</TestCaseName>
+        <Command>C:/Python36/python.exe</Command>
+        <Arguments>./scripts/1508145874/1508145874-1to10-Host.py</Arguments>
+        <IsEvent>false</IsEvent>
+    </TestCase>
+	<TestCase>
+        <PackageName>1507861716</PackageName>
+        <TestCaseName>1507861716</TestCaseName>
+        <Command>C:/Python36/python.exe</Command>
+        <Arguments>./scripts/1507861716/1507861716-1to3-Host.py</Arguments>
         <IsEvent>false</IsEvent>
     </TestCase>
 </TestCases>
