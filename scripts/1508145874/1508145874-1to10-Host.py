@@ -428,7 +428,7 @@ if __name__ == "__main__":
     except Exception:
         result_process(False, "Exception Occurred: \r\n %s" % (traceback.format_exc()), test_exit=True, is_step_complete=True)
     finally:
-        # tear_down()
+        tear_down()
         log_write('INFO', "%s steps executed with result verdict %s" % (STEP_NO - 1, IS_CASE_PASS))
         if len(FAIL_COLLECT) > 0:
             for i in FAIL_COLLECT:
