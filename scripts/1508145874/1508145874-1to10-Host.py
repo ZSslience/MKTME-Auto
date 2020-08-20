@@ -362,7 +362,7 @@ def test_execution():
     # The value of MSR.0x982 Bit[2] should be "0". The value of MSR.0x982 Bit[2] indicate:
     # 0 – Create a new TME key (expected cold/warm boot)
     # 1- Restore the TME key from storage(Expected when resume from standby)
-    result = ["0" in r_bin[-2]]
+    result = ["0" in r_bin[-3]]
     result_process(False not in result, "Check the value of TME/MK-TME ACTIVATE MSR 0x982. The value of MSR 0x982 Bit[2] should be 0")
 
     itp_ctrl("open")
@@ -395,7 +395,7 @@ def test_execution():
     # The value of MSR.0x982 Bit[2] should be "0". The value of MSR.0x982 Bit[2] indicate:
     # 0 – Create a new TME key (expected cold/warm boot)
     # 1- Restore the TME key from storage(Expected when resume from standby)
-    result = ["1" in r_bin[-2]]
+    result = ["1" in r_bin[-3]]
     result_process(False not in result, "Check the value of TME/MK-TME ACTIVATE MSR 0x982. The value of MSR 0x982 Bit[2] should be 1")
 
     test_reset(complete=True)
@@ -418,7 +418,7 @@ def test_execution():
     # The value of MSR.0x982 Bit[2] should be "0". The value of MSR.0x982 Bit[2] indicate:
     # 0 – Create a new TME key (expected cold/warm boot)
     # 1- Restore the TME key from storage(Expected when resume from standby)
-    result = ["0" in r_bin[-2]]
+    result = ["0" in r_bin[-3]]
     result_process(False not in result, "Check the value of TME/MK-TME ACTIVATE MSR 0x982. The value of MSR 0x982 Bit[2] should be 0")
 
 
