@@ -1,4 +1,5 @@
 import sys
+import threading
 import time
 import traceback
 from SoftwareAbstractionLayer import utils
@@ -290,6 +291,26 @@ def test_check_tme_entry(operate=False):
         return result_string
 
 
+def callback_logging():
+    result_process(False, "Test case execution terminated due to timeout occurred", test_exit=True, is_step_complete=False)
+
+
+def time_out(interval, callback=None):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            t = threading.Thread(target=func, args=args, kwargs=kwargs)
+            t.setDaemon(True)
+            t.start()
+            t.join(interval)
+            if t.is_alive() and callback:
+                return threading.Timer(0, callback).start()
+            else:
+                return
+        return wrapper
+    return decorator
+
+
+@time_out(1800, callback_logging)
 def test_execution():
     # Step 1: Flash BIOS IFWI and reset
     test_flash_ifwi(ifwi_release, complete=False)
