@@ -332,7 +332,7 @@ def test_execution():
     test_aesni_set()
     test_tme_set()
     test_mktme_set()
-    # disable_limit_pa46bits()
+    disable_limit_pa46bits()
     test_bios_reset(complete=False)
 
     itp_ctrl("open")

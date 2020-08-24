@@ -543,7 +543,7 @@ def test_execution():
     test_aesni_set(complete=False)
     test_tme_set(complete=False)
     test_mktme_set(complete=False)
-    # disable_limit_pa46bits()
+    disable_limit_pa46bits()
     test_bios_reset()
     result_process(True, "Enable TME and MKTME by traveling the follow knobs", test_exit=True, is_step_complete=True)
 
