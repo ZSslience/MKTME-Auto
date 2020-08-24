@@ -299,7 +299,7 @@ def test_adr_set(value="Enable", step_string="EDKII -> Socket Configuration -> M
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
 
 
-def test_fastboot_set(value="Enable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Attempt Fast Boot: ", complete=True):
+def test_fastboot_set(value="Enable", step_string="EDKII -> Socket Configuration -> Memory Configuration -> Attempt Fast Boot: ", complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
