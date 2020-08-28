@@ -37,6 +37,8 @@ mer_2_notme = int(utils.ReadConfig('1507834892', 'MAX_EFFICIENCY_RATIO_2_NO_TME'
 mr_2_tme = int(utils.ReadConfig('1507834892', 'MAX_RATIO_2_TME'), 16)
 gr_2_tme = int(utils.ReadConfig('1507834892', 'GUARANTEED_RATIO_2_TME'), 16)
 mer_2_tme = int(utils.ReadConfig('1507834892', 'MAX_EFFICIENCY_RATIO_2_TME'), 16)
+minr_2_tme = int(utils.ReadConfig('1507834892', 'MIN_RATIO_2_TME'), 16)
+te_2_tme = int(utils.ReadConfig('1507834892', 'TME_ENABLE'), 16)
 soundwave_port = utils.ReadConfig('SOUNDWAVE', 'PORT')
 wh = lib_wmi_handler.WmiHandler()
 bios_conf = BiosMenuConfig(TEST_CASE_ID, SCRIPT_ID)
@@ -234,8 +236,10 @@ def test_get_gv_state(initial_step=False):
     max_ratio = sv.socket0.pcudata.global_max_ratio_2
     grtee_ratio = sv.socket0.pcudata.global_guaranteed_ratio_2
     effect_ratio = sv.socket0.pcudata.global_max_efficiency_ratio_2
+    min_ratio = sv.socket0.pcudata.global_min_ratio_2
+    tme_enable = sv.socket0.uncore.memss.mc0.ch0.tme.tme_activate.tme_enable
     itp_sv.pythonsv_exit()
-    return max_ratio, grtee_ratio, effect_ratio
+    return max_ratio, grtee_ratio, effect_ratio, min_ratio, tme_enable
 
 
 def test_itp_msr(id=0x982, idx=0, step_string="reading itp.threads.msr MSR: ", complete=False):
@@ -333,7 +337,7 @@ def test_execution():
     test_flash_ifwi(ifwi_release, complete=False)
     test_boot_to_setup(step_string="Flash the latest BIOS and boot to setup menu", complete=True)
 
-    a, b, c = test_get_gv_state(initial_step=True)
+    a, b, c, _, _ = test_get_gv_state(initial_step=True)
     print(a, b, c)
     result = [a == mr_2_notme, b == gr_2_notme, c == mer_2_notme]
     result_process(False not in result, "Check GV status via PythonSV before TME set", test_exit=False, is_step_complete=True)
@@ -341,9 +345,9 @@ def test_execution():
     test_tme_set()
     test_bios_reset(complete=True)
 
-    a, b, c = test_get_gv_state(initial_step=True)
-    print(a, b, c)
-    result = [a == mr_2_tme, b == gr_2_tme, c == mer_2_tme]
+    a, b, c, d, e = test_get_gv_state(initial_step=True)
+    print(a, b, c, d, e)
+    result = [a == mr_2_tme, b == gr_2_tme, c == mer_2_tme, d == minr_2_tme, e == te_2_tme]
     result_process(False not in result, "Check GV status via PythonSV after TME set", test_exit=False, is_step_complete=True)
 
 

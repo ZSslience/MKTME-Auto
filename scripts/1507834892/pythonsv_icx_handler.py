@@ -5,7 +5,6 @@ sys.path.append(".")
 sys.path.append(r'C:\PythonSV\icelakex')
 
 from icelakex.starticx import *
-from icelakex.toolext import pysv_config
 from svtools.common.pysv_config import CFG
 
 def pythonsv_init(try_times=5):
