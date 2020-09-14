@@ -180,12 +180,12 @@ def test_tme_set(value="Enable", step_string="EDKII -> Socket Configuration -> P
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
 
 
-def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Multi-Key "
-                                               "Total Memory Encryption (MK-TME): ", complete=True):
+def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> "
+                                               "Total Memory Encryption Multi-Tenant(TME-MT): ", complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.bios_opt_drop_down_menu_select('Multikey Total Memory Encryption (MK-TME)', value)
+        result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption Multi-Tenant(TME-MT)', value)
         bios_conf.bios_save_changes()
         time.sleep(5)
         bios_conf.bios_back_home()
@@ -255,17 +255,17 @@ def test_check_tme_entry(operate=False):
     result_string = []
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.get_system_information('Multikey Total Memory Encryption (MK-TME)')
+        result = bios_conf.get_system_information('Total Memory Encryption Multi-Tenant(TME-MT)')
         if result:
-            result_string.append("Multikey Total Memory Encryption (MK-TME): %s" % result)
+            result_string.append("Total Memory Encryption Multi-Tenant(TME-MT): %s" % result)
         else:
-            result_string.append("Multikey Total Memory Encryption (MK-TME): not appear")
+            result_string.append("Total Memory Encryption Multi-Tenant(TME-MT): not appear")
 
-        result = bios_conf.get_system_information('Max MKTME Keys')
+        result = bios_conf.get_system_information('Max TME-MT Keys')
         if result:
-            result_string.append("Max MKTME Keys: %s" % result)
+            result_string.append("Max TME-MT Keys: %s" % result)
         else:
-            result_string.append("Max MKTME Keys: not appear")
+            result_string.append("Max TME-MT Keys: not appear")
 
         bios_conf.bios_menu_navi(["Processor Dfx Configuration"], wait_time=opt_wait_time)
 
@@ -352,11 +352,11 @@ def test_execution():
     result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982",
                    test_exit=True, is_step_complete=True)
 
-    # Step 5: Check Max MKTME Keys
+    # Step 5: Check Max TME-MT Keys
     result = test_check_tme_entry()
     check_length = len([i for i in result if "not appear" in i])
     result_process((check_length == 0) and (max_tme_keys in result[1]),
-                   "MK-TME Enable: \n%s" % result,
+                   "TME-MT Enable: \n%s" % result,
                    test_exit=False, is_step_complete=True)
 
 
