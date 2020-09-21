@@ -363,8 +363,8 @@ def test_execution():
 
     test_aesni_set(complete=False)
     test_tme_set(complete=False)
-    test_mktme_set(complete=False)
     disable_limit_pa46bits(complete=False)
+    test_mktme_set(complete=False)
     test_reset(complete=True)
 
     itp_ctrl("open")

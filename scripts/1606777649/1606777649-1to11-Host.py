@@ -301,10 +301,10 @@ def test_execution():
 
     # Step 4-6: Enable TME/MKTME and reset
     test_tme_set()
-    test_mktme_set()
     # Workaround to make MKTME work from sighting https://hsdes.intel.com/appstore/article/#/1508152249
     # Not necessary and may be removed in future.
     disable_limit_pa46bits()
+    test_mktme_set()
     test_bios_reset()
 
     # Step 7: Check CPU cores and threads

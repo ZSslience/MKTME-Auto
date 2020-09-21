@@ -331,8 +331,8 @@ def test_execution():
 
     test_aesni_set()
     test_tme_set()
-    test_mktme_set()
     disable_limit_pa46bits()
+    test_mktme_set()
     test_bios_reset(complete=False)
     result_process(True, "Skipped on ICX-SP ICX-D: Goto BIOS setup, change following setting to 16T EDKII -> Socket Configuration -> Common RefCode Configuration ->MMIO High Base:16T", test_exit=True, is_step_complete=True)
 
