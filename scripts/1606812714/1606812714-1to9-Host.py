@@ -2,7 +2,7 @@ import sys
 import time
 import threading
 import traceback
-import pythonsv_icx_handler as itp_sv
+
 from MiddleWare import lib_wmi_handler
 from MiddleWare import lib_flash_server as lfs
 from MiddleWare import lib_power_action_soundwave as lpa
@@ -39,6 +39,7 @@ soundwave_port = utils.ReadConfig('SOUNDWAVE', 'PORT')
 wh = lib_wmi_handler.WmiHandler()
 bios_conf = BiosMenuConfig(TEST_CASE_ID, SCRIPT_ID)
 
+import pythonsv_icx_handler as itp_sv
 # Test Case Steps Abstraction
 
 
@@ -125,7 +126,7 @@ def tear_down():
     if sut_state == "windows":
         wh.wmi_os_opt(local=False, os_instruct="shutdown")
     log_write("INFO", "SUT is under %s state, perform G3" % sut_state)
-    lpa.ac_off(soundwave_port)
+    # lpa.ac_off(soundwave_port)
     time.sleep(5)
 
 
@@ -183,7 +184,7 @@ def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the lates
     if os_state == "windows":
         wh.wmi_os_opt(local=False, os_instruct="shutdown")
     try:
-        lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
+        # lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
         lpa.ac_on(port)
         time.sleep(20)
         log_write('INFO', "IFWI flashed successfully with: %s" % image_for_flash)
@@ -246,11 +247,11 @@ def test_bios_reset(flag=True, step_string="Save, reset, boot to BIOS", complete
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
 
 
-def test_max_mktme_keys_get(verdict="0x3f", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Max MKTME keys: ", complete=True):
+def test_max_mktme_keys_get(verdict="0x3f", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Max TME-MT Keys: ", complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.get_system_information("Max MKTME Keys")
+        result = bios_conf.get_system_information("Max TME-MT Keys")
         result_process(verdict in result, "%s %s" % (step_string, result), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -278,11 +279,11 @@ def test_tme_set(value="Enable", step_string="EDKII -> Socket Configuration -> P
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
 
 
-def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Multi-Key Total Memory Encryption (MK-TME): ", complete=True):
+def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Total Memory Encryption Multi-Tenant(TME-MT): ", complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.bios_opt_drop_down_menu_select('Multikey Total Memory Encryption (MK-TME)', value)
+        result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption Multi-Tenant(TME-MT)', value)
         bios_conf.bios_save_changes()
         bios_conf.bios_back_home()
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
@@ -326,13 +327,13 @@ def time_out(interval, callback=None):
 # Test Case Execution
 def test_execution():
     # Test Run Start
-    test_flash_ifwi(ifwi_release, complete=False)
+    #test_flash_ifwi(ifwi_release, complete=False)
     test_boot_to_setup(step_string="Flash the latest BIOS and boot to setup menu", complete=True)
 
     test_aesni_set()
     test_tme_set()
     test_mktme_set()
-    disable_limit_pa46bits()
+    #disable_limit_pa46bits()
     test_bios_reset(complete=False)
     result_process(True, "Skipped on ICX-SP ICX-D: Goto BIOS setup, change following setting to 16T EDKII -> Socket Configuration -> Common RefCode Configuration ->MMIO High Base:16T", test_exit=True, is_step_complete=True)
 
