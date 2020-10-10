@@ -9,84 +9,70 @@
         <PackageName>1507268867</PackageName>
         <TestCaseName>1507268867</TestCaseName>
         <Command>C:/Python36/python.exe</Command>
-        <Arguments>./scripts/1507268867/1507268867.py</Arguments>
-        <IsEvent>false</IsEvent>
-    </TestCase>
-    <TestCase>
-        <PackageName>1507396220</PackageName>
-        <TestCaseName>1507396220</TestCaseName>
-        <Command>C:/Python36/python.exe</Command>
-        <Arguments>./scripts/1507396220/1507396220.py</Arguments>
-        <IsEvent>false</IsEvent>
-    </TestCase>
-    <TestCase>
-        <PackageName>1507834892</PackageName>
-        <TestCaseName>1507834892</TestCaseName>
-        <Command>C:/Python36/python.exe</Command>
-        <Arguments>./scripts/1507834892/1507834892.py</Arguments>
-        <IsEvent>false</IsEvent>
-    </TestCase>
-    <TestCase>
-        <PackageName>1507927027</PackageName>
-        <TestCaseName>1507927027</TestCaseName>
-        <Command>C:/Python36/python.exe</Command>
-        <Arguments>./scripts/1507927027/1507927027.py</Arguments>
-        <IsEvent>false</IsEvent>
-    </TestCase>
-    <TestCase>
-        <PackageName>1606806788</PackageName>
-        <TestCaseName>1606806788</TestCaseName>
-        <Command>C:/Python36/python.exe</Command>
-        <Arguments>./scripts/1606806788/1606806788.py</Arguments>
-        <IsEvent>false</IsEvent>
-    </TestCase>
-    <TestCase>
-        <PackageName>1606808045</PackageName>
-        <TestCaseName>1606808045</TestCaseName>
-        <Command>C:/Python36/python.exe</Command>
-        <Arguments>./scripts/1606808045/1606808045.py</Arguments>
-        <IsEvent>false</IsEvent>
-    </TestCase>
-    <TestCase>
-        <PackageName>1606811369</PackageName>
-        <TestCaseName>1606811369</TestCaseName>
-        <Command>C:/Python36/python.exe</Command>
-        <Arguments>./scripts/1606811369/1606811369.py</Arguments>
-        <IsEvent>false</IsEvent>
-    </TestCase>
-    <TestCase>
-        <PackageName>1606812714</PackageName>
-        <TestCaseName>1606812714</TestCaseName>
-        <Command>C:/Python36/python.exe</Command>
-        <Arguments>./scripts/1606812714/1606812714.py</Arguments>
-        <IsEvent>false</IsEvent>
-    </TestCase>
-        <TestCase>
-        <PackageName>1606777649</PackageName>
-        <TestCaseName>1606777649</TestCaseName>
-        <Command>C:/Python36/python.exe</Command>
-        <Arguments>./scripts/1606777649/1606777649.py</Arguments>
+        <Arguments>C:/Testing/FrameworkBuilds/GenericFramework/MKTME-Auto/scripts/1507268867/1507268867.py</Arguments>
         <IsEvent>false</IsEvent>
     </TestCase>
     <TestCase>
         <PackageName>1507269086</PackageName>
         <TestCaseName>1507269086</TestCaseName>
         <Command>C:/Python36/python.exe</Command>
-        <Arguments>./scripts/1507269086/1507269086.py</Arguments>
+        <Arguments>C:/Testing/FrameworkBuilds/GenericFramework/MKTME-Auto/scripts/1507269086/1507269086.py</Arguments>
         <IsEvent>false</IsEvent>
     </TestCase>
-	<TestCase>
-        <PackageName>1508145874</PackageName>
-        <TestCaseName>1508145874</TestCaseName>
+    <TestCase>
+        <PackageName>1507396220</PackageName>
+        <TestCaseName>1507396220</TestCaseName>
         <Command>C:/Python36/python.exe</Command>
-        <Arguments>./scripts/1508145874/1508145874-1to10-Host.py</Arguments>
+        <Arguments>C:/Testing/FrameworkBuilds/GenericFramework/MKTME-Auto/scripts/1507396220/1507396220.py</Arguments>
         <IsEvent>false</IsEvent>
     </TestCase>
-	<TestCase>
-        <PackageName>1507861716</PackageName>
-        <TestCaseName>1507861716</TestCaseName>
+    <TestCase>
+        <PackageName>1507834892</PackageName>
+        <TestCaseName>1507834892</TestCaseName>
         <Command>C:/Python36/python.exe</Command>
-        <Arguments>./scripts/1507861716/1507861716-1to3-Host.py</Arguments>
+        <Arguments>C:/Testing/FrameworkBuilds/GenericFramework/MKTME-Auto/scripts/1507834892/1507834892.py</Arguments>
+        <IsEvent>false</IsEvent>
+    </TestCase>
+    <TestCase>
+        <PackageName>1507927027</PackageName>
+        <TestCaseName>1507927027</TestCaseName>
+        <Command>C:/Python36/python.exe</Command>
+        <Arguments>C:/Testing/FrameworkBuilds/GenericFramework/MKTME-Auto/scripts/1507927027/1507927027.py</Arguments>
+        <IsEvent>false</IsEvent>
+    </TestCase>
+    <TestCase>
+        <PackageName>1606777649</PackageName>
+        <TestCaseName>1606777649</TestCaseName>
+        <Command>C:/Python36/python.exe</Command>
+        <Arguments>C:/Testing/FrameworkBuilds/GenericFramework/MKTME-Auto/scripts/1606777649/1606777649.py</Arguments>
+        <IsEvent>false</IsEvent>
+    </TestCase>
+    <TestCase>
+        <PackageName>1606806788</PackageName>
+        <TestCaseName>1606806788</TestCaseName>
+        <Command>C:/Python36/python.exe</Command>
+        <Arguments>C:/Testing/FrameworkBuilds/GenericFramework/MKTME-Auto/scripts/1606806788/1606806788.py</Arguments>
+        <IsEvent>false</IsEvent>
+    </TestCase>
+    <TestCase>
+        <PackageName>1606808045</PackageName>
+        <TestCaseName>1606808045</TestCaseName>
+        <Command>C:/Python36/python.exe</Command>
+        <Arguments>C:/Testing/FrameworkBuilds/GenericFramework/MKTME-Auto/scripts/1606808045/1606808045.py</Arguments>
+        <IsEvent>false</IsEvent>
+    </TestCase>
+    <TestCase>
+        <PackageName>1606811369</PackageName>
+        <TestCaseName>1606811369</TestCaseName>
+        <Command>C:/Python36/python.exe</Command>
+        <Arguments>C:/Testing/FrameworkBuilds/GenericFramework/MKTME-Auto/scripts/1606811369/1606811369.py</Arguments>
+        <IsEvent>false</IsEvent>
+    </TestCase>
+    <TestCase>
+        <PackageName>1606812714</PackageName>
+        <TestCaseName>1606812714</TestCaseName>
+        <Command>C:/Python36/python.exe</Command>
+        <Arguments>C:/Testing/FrameworkBuilds/GenericFramework/MKTME-Auto/scripts/1606812714/1606812714.py</Arguments>
         <IsEvent>false</IsEvent>
     </TestCase>
 </TestCases>
