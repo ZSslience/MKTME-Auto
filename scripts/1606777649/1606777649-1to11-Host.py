@@ -198,6 +198,22 @@ def test_mktme_set(value="Enable",
                        is_step_complete=complete)
 
 
+def test_directory_mode(verdict="Auto",
+                        step_string="EDKII Menu -> Socket Configuration -> Uncore Configuration -> "
+                                    "Uncore General Configuration -> Directory Mode Enable",
+                        complete=False):
+    boot_state = is_boot_state()
+    if boot_state == 'bios':
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Uncore Configuration",
+                                  "Uncore General Configuration"],
+                                 wait_time=opt_wait_time)
+        result = bios_conf.get_system_information("Directory Mode Enable")
+        result_process(result in ['Auto', 'Enable'], "%s %s" % (step_string, result), test_exit=True,
+                       is_step_complete=complete)
+    else:
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True,
+                       is_step_complete=complete)
+
 def disable_limit_pa46bits(value="Disable",
                            step_string="EDKII -> Socket Configuration -> Processor Configuration -> Limit CPU PA to "
                                        "46 bits",
@@ -305,7 +321,8 @@ def test_execution():
     # Not necessary and may be removed in future.
     disable_limit_pa46bits()
     test_mktme_set()
-    test_bios_reset()
+    test_bios_reset(complete=False)
+
 
     # Step 7: Check CPU cores and threads
     itp_ctrl("open")
