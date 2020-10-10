@@ -246,7 +246,7 @@ def test_bios_reset(flag=True, step_string="Save, reset, boot to BIOS", complete
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
 
 
-def test_max_mktme_keys_get(verdict="0x3f", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Max TME-MT Keys: ", complete=True):
+def test_max_mktme_keys_get(verdict="0x3F", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Max TME-MT Keys: ", complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
