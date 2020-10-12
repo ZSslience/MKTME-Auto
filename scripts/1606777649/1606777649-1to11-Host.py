@@ -207,7 +207,7 @@ def test_directory_mode(step_string="EDKII Menu -> Socket Configuration -> Uncor
                                   "Uncore General Configuration"],
                                  wait_time=opt_wait_time)
         result = bios_conf.get_system_information("Directory Mode Enable")
-        result_process(result in ['Auto', 'Enable'], "%s %s" % (step_string, result), test_exit=True,
+        result_process(result in ['<Auto>', '<Enable>'], "%s %s" % (step_string, result), test_exit=True,
                        is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True,
