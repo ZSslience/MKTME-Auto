@@ -198,8 +198,7 @@ def test_mktme_set(value="Enable",
                        is_step_complete=complete)
 
 
-def test_directory_mode(verdict="Auto",
-                        step_string="EDKII Menu -> Socket Configuration -> Uncore Configuration -> "
+def test_directory_mode(step_string="EDKII Menu -> Socket Configuration -> Uncore Configuration -> "
                                     "Uncore General Configuration -> Directory Mode Enable",
                         complete=False):
     boot_state = is_boot_state()
@@ -213,6 +212,7 @@ def test_directory_mode(verdict="Auto",
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True,
                        is_step_complete=complete)
+
 
 def disable_limit_pa46bits(value="Disable",
                            step_string="EDKII -> Socket Configuration -> Processor Configuration -> Limit CPU PA to "
@@ -315,14 +315,16 @@ def test_execution():
                    test_exit=False, is_step_complete=True)
     itp_ctrl("close")
 
-    # Step 4-6: Enable TME/MKTME and reset
+    # Step 4-5: Enable TME/MKTME
     test_tme_set()
     # Workaround to make MKTME work from sighting https://hsdes.intel.com/appstore/article/#/1508152249
     # Not necessary and may be removed in future.
     disable_limit_pa46bits()
     test_mktme_set()
-    test_bios_reset(complete=False)
 
+    # Step 6: reset and check directory mode
+    test_bios_reset(complete=False)
+    test_directory_mode(complete=True)
 
     # Step 7: Check CPU cores and threads
     itp_ctrl("open")
