@@ -41,6 +41,13 @@
         <IsEvent>false</IsEvent>
     </TestCase>
     <TestCase>
+        <PackageName>1508351737</PackageName>
+        <TestCaseName>1508351737</TestCaseName>
+        <Command>C:/Python36/python.exe</Command>
+        <Arguments>C:/Testing/FrameworkBuilds/GenericFramework/MKTME-Auto/scripts/1507927027/1508351737-1to7-Host.py</Arguments>
+        <IsEvent>false</IsEvent>
+    </TestCase>
+    <TestCase>
         <PackageName>1606777649</PackageName>
         <TestCaseName>1606777649</TestCaseName>
         <Command>C:/Python36/python.exe</Command>
