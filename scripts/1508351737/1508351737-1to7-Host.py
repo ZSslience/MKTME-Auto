@@ -12,7 +12,6 @@ from SoftwareAbstractionLayer import lib_constants
 from SoftwareAbstractionLayer import utils
 import pythonsv_icx_handler as itp_sv
 
-
 # Constants Definition
 TEST_CASE_ID = "1508351737"
 SCRIPT_ID = "1508351737-1to-Host.py"
@@ -164,6 +163,7 @@ def test_aesni_set(value="Enable", step_string="EDKII -> Socket Configuration ->
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True,
+                       is_step_complete=complete)
 
 
 def test_tme_set(value="Enable",
@@ -178,8 +178,8 @@ def test_tme_set(value="Enable",
         bios_conf.bios_save_changes()
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
-       result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
-                      test_exit=True, is_step_complete=complete)
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
 
 
 def disable_limit_pa46bits(value="Disable",
@@ -256,7 +256,9 @@ def time_out(interval, callback=None):
                 return threading.Timer(0, callback).start()
             else:
                 return
+
         return wrapper
+
     return decorator
 
 
