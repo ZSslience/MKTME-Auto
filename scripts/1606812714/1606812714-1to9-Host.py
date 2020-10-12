@@ -185,6 +185,7 @@ def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the lates
         wh.wmi_os_opt(local=False, os_instruct="shutdown")
     try:
         # lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
+        lfs.flash_bmc(image_for_flash)
         lpa.ac_on(port)
         time.sleep(20)
         log_write('INFO', "IFWI flashed successfully with: %s" % image_for_flash)
@@ -327,7 +328,7 @@ def time_out(interval, callback=None):
 # Test Case Execution
 def test_execution():
     # Test Run Start
-    #test_flash_ifwi(ifwi_release, complete=False)
+    test_flash_ifwi(ifwi_release, complete=False)
     test_boot_to_setup(step_string="Flash the latest BIOS and boot to setup menu", complete=True)
 
     test_aesni_set()
