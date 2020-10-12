@@ -216,6 +216,23 @@ def test_mktme_set(value="Enable",
                        test_exit=True, is_step_complete=complete)
 
 
+def test_mmio_high_base_set(value="16T", step_string="EDKII -> Socket Configuration -> Processor Configuration"
+                                                     "Common RefCode Configuration -> MMIO High Base",
+                            complete=True):
+    boot_state = is_boot_state()
+    if boot_state == 'bios':
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration",
+                                  "Common RefCode Configuration"])
+        result = bios_conf.bios_opt_drop_down_menu_select("MMIO High Base", value)
+        bios_conf.bios_save_changes()
+        bios_conf.bios_back_home()
+        result_process(result, "%s:%s" % (step_string, value), test_exit=True, is_step_complete=complete)
+    else:
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
+
+
+
 def test_bios_reset(flag=True, step_string="Save, reset, boot to BIOS", complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
@@ -286,10 +303,8 @@ def test_execution():
 
     # Save configuration and reset
     test_bios_reset(complete=False)
-    # Step 5: skip MMIO High Base configuration
-    result_process(True, "Skipped on ICX-SP ICX-D: Goto BIOS setup, change following setting to 16T EDKII -> "
-                         "Socket Configuration -> Common RefCode Configuration ->MMIO High Base:16T",
-                   test_exit=True, is_step_complete=True)
+    # Step 5: MMIO High Base configuration: 16T
+    test_mmio_high_base_set()
 
     # Step 6: Check MSR 0x981
     itp_ctrl("open")
