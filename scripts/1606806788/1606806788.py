@@ -20,7 +20,7 @@ try:
     steps = 1
 
     print("\n################################################################")
-    command = "C:/Python36/python.exe ./scripts/1606806788/1606806788-1to6-Host.py"
+    command = "C:/Python36/python.exe 1606806788-1to6-Host.py"
     print("Executing: %s" % command)
 
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, 
