@@ -20,7 +20,9 @@ try:
     steps = 1
 
     print("\n################################################################")
-    command = "C:/Python36/python.exe 1606811369-1to16-Host.py"
+    tc_script = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             '1606811369-1to16-Host.py')
+    command = "C:/Python36/python.exe %s" % tc_script
     print("Executing: %s" % command)
 
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, 

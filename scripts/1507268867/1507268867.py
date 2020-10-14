@@ -1,4 +1,3 @@
-
 import os
 import subprocess
 import sys
@@ -20,17 +19,19 @@ try:
     steps = 1
 
     print("\n################################################################")
-    command = "C:/Python36/python.exe 1507268867-1to10-Host.py"
+    tc_script = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             '1507268867-1to10-Host.py')
+    command = "C:/Python36/python.exe %s" % tc_script
     print("Executing: %s" % command)
 
-    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, 
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE,
                                stdin=subprocess.PIPE, stderr=subprocess.PIPE)
     output, err = process.communicate()
     time.sleep(2)
     print("stdout:")
-    print(str(output, encoding='utf-8',errors='ignore'))
+    print(str(output, encoding='utf-8', errors='ignore'))
     print("stderr:")
-    print(str(err, encoding='utf-8',errors='ignore'))
+    print(str(err, encoding='utf-8', errors='ignore'))
     if process.returncode == 0:
         count = count + 1
 
