@@ -183,7 +183,8 @@ def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the lates
     if os_state == "windows":
         wh.wmi_os_opt(local=False, os_instruct="shutdown")
     try:
-        lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
+        # lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
+        lfs.flash_bmc(image_for_flash)
         lpa.ac_on(port)
         time.sleep(20)
         log_write('INFO', "IFWI flashed successfully with: %s" % image_for_flash)
@@ -278,16 +279,21 @@ def test_tme_set(value="Enable", step_string="EDKII -> Socket Configuration -> P
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
 
 
-def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Multi-Key Total Memory Encryption (MK-TME): ", complete=True):
+def test_mktme_set(value="Enable",
+                   step_string="EDKII -> Socket Configuration -> Processor Configuration -> "
+                               "Total Memory Encryption Multi-Tenant(TME-MT): ",
+                   complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.bios_opt_drop_down_menu_select('Multikey Total Memory Encryption (MK-TME)', value)
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
+                                 wait_time=opt_wait_time)
+        result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption Multi-Tenant(TME-MT)', value)
         bios_conf.bios_save_changes()
         bios_conf.bios_back_home()
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
 
 
 def disable_limit_pa46bits(value="Disable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Limit CPU PA to 46 bits", complete=False):
@@ -332,9 +338,10 @@ def test_execution():
     test_aesni_set()
     test_tme_set()
     test_mktme_set()
-    disable_limit_pa46bits()
+    # disable_limit_pa46bits()
     test_bios_reset(complete=False)
 
+    time.sleep(20)
     itp_ctrl("open")
     result = test_msr(id=0x35)
     itp_ctrl("close")
@@ -370,6 +377,7 @@ def test_execution():
     test_tme_set("Disable")
     test_bios_reset(complete=False)
 
+    time.sleep(20)
     itp_ctrl("open")
     msr_9ff_core_0 = test_itp_msr(id=0x9ff, idx=0)
     msr_9ff_core_max = test_itp_msr(id=0x9ff, idx=(max_active_thread-1))

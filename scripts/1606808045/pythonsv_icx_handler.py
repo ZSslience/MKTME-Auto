@@ -2,10 +2,12 @@ import sys
 
 print("----------------------- pythonsv project init -----------------------")
 sys.path.append(".")
-sys.path.append(r'C:\PythonSV\icelakex')
+sys.path.append(r'C:\PythonSV\icelakexd')
 
-from icelakex.starticx import *
+from icelakexd.starticxd import *
 from svtools.common.pysv_config import CFG
+
+add_to_main(CFG)
 
 def pythonsv_init(try_times=5):
     for i in range(try_times):
