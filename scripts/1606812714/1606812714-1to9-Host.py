@@ -126,7 +126,7 @@ def tear_down():
     if sut_state == "windows":
         wh.wmi_os_opt(local=False, os_instruct="shutdown")
     log_write("INFO", "SUT is under %s state, perform G3" % sut_state)
-    # lpa.ac_off(soundwave_port)
+    lpa.ac_off(soundwave_port)
     time.sleep(5)
 
 
@@ -338,6 +338,7 @@ def test_execution():
     test_bios_reset(complete=False)
     result_process(True, "Skipped on ICX-SP ICX-D: Goto BIOS setup, change following setting to 16T EDKII -> Socket Configuration -> Common RefCode Configuration ->MMIO High Base:16T", test_exit=True, is_step_complete=True)
 
+    time.sleep(20)
     itp_ctrl("open")
     result = test_msr(id=0x35)
     itp_ctrl("close")

@@ -22,7 +22,7 @@ FAIL_COLLECT = []
 opt_wait_time = 5
 os_boot_timeout = 120
 boot_wait_timeout = 600
-f2_timeout = 15
+f2_timeout = 30
 
 soundwave_port = utils.ReadConfig('SOUNDWAVE', 'PORT')
 ifwi_release = utils.ReadConfig('IFWI_IMAGES', 'RELEASE')
@@ -181,21 +181,19 @@ def test_tme_set(value="Enable",
 
 
 def test_mktme_set(value="Enable",
-                   step_string="EDKII -> Socket Configuration -> Processor Configuration -> Multi-Key Total Memory "
-                               "Encryption (MK-TME): ",
+                   step_string="EDKII -> Socket Configuration -> Processor Configuration -> Total Memory Encryption Multi-Tenant(TME-MT): ",
                    complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
                                  wait_time=opt_wait_time)
-        result = bios_conf.bios_opt_drop_down_menu_select('Multikey Total Memory Encryption (MK-TME)', value)
+        result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption Multi-Tenant(TME-MT)', value)
         bios_conf.bios_save_changes()
-        time.sleep(5)
         bios_conf.bios_back_home()
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True,
-                       is_step_complete=complete)
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
 
 
 def disable_limit_pa46bits(value="Disable",
@@ -247,7 +245,8 @@ def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the lates
     if os_state == "windows":
         wh.wmi_os_opt(local=False, os_instruct="shutdown")
     try:
-        lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
+        # lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
+        lfs.flash_bmc(image_for_flash)
         lpa.ac_on(port)
         time.sleep(20)
         log_write('INFO', "IFWI flashed successfully with: %s" % image_for_flash)
@@ -276,12 +275,13 @@ def time_out(interval, callback=None):
     return decorator
 
 
-@time_out(1800, callback_logging)
+@time_out(3600, callback_logging)
 def test_execution():
     # Step1: Flash IFWI and reset
     test_flash_ifwi(ifwi_release, complete=False)
     test_boot_to_setup(step_string="Flash the latest BIOS and boot to setup menu", complete=True)
 
+    time.sleep(20)
     # Step 2: read CPUID(0x7, 0)
     itp_ctrl("open")
     result = test_cpuid(id=0x7, idx=0, target="ecx", step_string="reading CPUID 7.0.ECX bit 13", complete=False)
@@ -302,10 +302,8 @@ def test_execution():
     # Step 4-6: Enable TME/MKTME and reset
     test_tme_set()
     test_mktme_set()
-    # Workaround to make MKTME work from sighting https://hsdes.intel.com/appstore/article/#/1508152249
-    # Not necessary and may be removed in future.
-    disable_limit_pa46bits()
     test_bios_reset()
+    time.sleep(20)
 
     # Step 7: Check CPU cores and threads
     itp_ctrl("open")
@@ -350,6 +348,7 @@ def test_execution():
     # Step 10: Disable TME and check MSR 0x982
     test_tme_set(value="Disable", complete=False)
     test_bios_reset(complete=False)
+    time.sleep(20)
     itp_ctrl("open")
     msr_982_core_0 = test_itp_msr(id=0x982, idx=0)
     msr_982_core_max = test_itp_msr(id=0x982, idx=(max_active_thread - 1))
@@ -368,6 +367,7 @@ def test_execution():
     test_tme_set(complete=False)
     test_mktme_set(value="Disable", complete=False)
     test_bios_reset(complete=False)
+    time.sleep(20)
     itp_ctrl("open")
     msr_982_core_0 = test_itp_msr(id=0x982, idx=0)
     msr_982_core_max = test_itp_msr(id=0x982, idx=(max_active_thread - 1))
@@ -390,7 +390,7 @@ def tear_down():
     if sut_state == "windows":
         wh.wmi_os_opt(local=False, os_instruct="shutdown")
     log_write("INFO", "Tear Down: SUT is under %s state, perform G3" % sut_state)
-    lpa.ac_off(soundwave_port)
+    # lpa.ac_off(soundwave_port)
     time.sleep(5)
 
 
