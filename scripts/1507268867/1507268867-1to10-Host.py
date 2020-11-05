@@ -4,7 +4,7 @@ import sys
 import time
 import threading
 import traceback
-import pythonsv_icx_handler as itp_sv
+
 from HardwareAbstractionLayer import hal_serial_opt as hso
 from MiddleWare import lib_wmi_handler
 from MiddleWare import lib_flash_server as lfs
@@ -14,7 +14,7 @@ from SoftwareAbstractionLayer import utils
 from SoftwareAbstractionLayer import library
 from SoftwareAbstractionLayer import lib_constants
 
-
+import pythonsv_icx_handler as itp_sv
 # 1507268867 [PreSi & PostSi][Security][MKTME] Detect EFI_MEMORY_CPU_CRYPTO can encrypt memory when MKTME enabled.
 # rev.26
 
@@ -178,12 +178,13 @@ def os_boot_check(round=1):
     return False
 
 
-def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the latest BIOS and boot to setup menu", complete=True):
+def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the latest BIOS and boot to setup menu",
+                    complete=True):
     os_state = is_boot_state()
     if os_state == "windows":
         wh.wmi_os_opt(local=False, os_instruct="shutdown")
     try:
-        lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
+        lfs.flash_bmc(image_for_flash)
         lpa.ac_on(port)
         time.sleep(20)
         log_write('INFO', "IFWI flashed successfully with: %s" % image_for_flash)
@@ -258,99 +259,80 @@ def test_bios_reset(flag=True, step_string="Save, reset, boot to BIOS", complete
         result = bios_conf.reset_to_bios(to_save=flag, wait_timeout=boot_wait_timeout, f2_press_wait=f2_timeout)
         result_process(result, step_string, test_exit=True, is_step_complete=complete)
     else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
 
 
-def test_reset_to_efi(flag=True, step_string="Save, reset, boot to EFI Shell", complete=True):
+def test_max_mktme_keys_get(verdict="0x3F",
+                            step_string="EDKII -> Socket Configuration -> Processor Configuration -> Max TME-MT Keys: ",
+                            complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
-        result = bios_conf.reset_to_bios(to_save=flag, wait_timeout=boot_wait_timeout, f2_press_wait=f2_timeout)
-        result_process(result, "Save, reset, boot to BIOS", test_exit=True, is_step_complete=False)
-        fs_drive = bios_conf.enter_efi_shell(volume_alias=usb_drive_alias)
-        return fs_drive
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
+                                 wait_time=opt_wait_time)
+        result = bios_conf.get_system_information("Max TME-MT Keys")
+        result_process(verdict in result, "%s %s" % (step_string, result),
+                       test_exit=True, is_step_complete=complete)
     else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
 
 
-def test_max_mktme_keys_get(verdict="0x3f", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Max MKTME keys: ", complete=True):
+def test_aesni_set(value="Enable",
+                   step_string="EDKII -> Socket Configuration -> Processor Configuration -> AES-NI: ",
+                   complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.get_system_information("Max MKTME Keys")
-        result_process(verdict in result, "%s %s" % (step_string, result), test_exit=True, is_step_complete=complete)
-    else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
-
-
-def test_aesni_set(value="Enable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> AES-NI: ", complete=True):
-    boot_state = is_boot_state()
-    if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
+                                 wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('AES-NI', value)
         bios_conf.bios_save_changes()
         time.sleep(5)
         bios_conf.bios_back_home()
-        result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
+        result_process(result, "%s %s" % (step_string, value),
+                       test_exit=True, is_step_complete=complete)
     else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
 
 
-def test_tme_set(value="Enable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Total Memory Encryption (TME): ", complete=True):
+def test_tme_set(value="Enable",
+                 step_string="EDKII -> Socket Configuration -> Processor Configuration -> "
+                             "Total Memory Encryption (TME): ",
+                 complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
+                                 wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption (TME)', value)
         bios_conf.bios_save_changes()
         time.sleep(5)
         bios_conf.bios_back_home()
-        result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
+        result_process(result, "%s %s" % (step_string, value),
+                       test_exit=True, is_step_complete=complete)
     else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
 
 
-def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Multi-Key Total Memory Encryption (MK-TME): ", complete=True):
+def test_mktme_set(value="Enable",
+                   step_string="EDKII -> Socket Configuration -> Processor Configuration -> "
+                               "Total Memory Encryption Multi-Tenant(TME-MT): ",
+                   complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.bios_opt_drop_down_menu_select('Multikey Total Memory Encryption (MK-TME)', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
-        result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
-    else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
-
-
-def disable_limit_pa46bits(value="Disable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Limit CPU PA to 46 bits", complete=False):
-    boot_state = is_boot_state()
-    if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.bios_opt_drop_down_menu_select('Limit CPU PA to 46 bits', value)
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
+                                 wait_time=opt_wait_time)
+        result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption Multi-Tenant(TME-MT)', value)
         bios_conf.bios_save_changes()
         bios_conf.bios_back_home()
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True,
-                       is_step_complete=complete)
-
-
-def test_serial_debug_msg_lvl(value="Maximum", step_string="EDKII Menu ->Platform Configuration->Miscellaneous Configuration->Serial Debug Message Level -> Maximum / Normal", complete=True):
-    # Disable/ Minimum/ Normal/ Maxium/ Auto/ Fixed PCD
-    boot_state = is_boot_state()
-    if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Platform Configuration", "Miscellaneous Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.bios_opt_drop_down_menu_select('Serial Debug Message Level', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
-        result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
-    else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
 
 
 def test_efi_command_run(command, wait_time, step_string, complete=True, log=False):
-    reset_button(1)
-    bios_conf.enter_bios(wait_timeout=boot_wait_timeout, f2_timeout=f2_timeout)
     fs_drive = bios_conf.enter_efi_shell(volume_alias=usb_drive_alias, time_out=30)
     print(fs_drive)
     bios_conf.efi_shell_cmd(fs_drive)
@@ -380,27 +362,6 @@ def test_memmap_parse(log_file, query_string):
         return ret_index[-1], len(ret_list), ret_list
 
 
-def test_capture_debug_log(capture=True, complete=True):
-    if capture:
-        hs._imp_port_mngr("open")
-        result_process(True, "Perform Capture of debug log", test_exit=True, is_step_complete=complete)
-    else:
-        result_process(True, "Perform Stop Capture of debug log", test_exit=True, is_step_complete=complete)
-        return hs._imp_buffer_sync()
-
-
-def test_bios_boot_log_cap(step_string="Start collecting the serial Logs", complete=True):
-    boot_state = is_boot_state()
-    if boot_state == 'bios':
-        bios_conf.reset_system()
-        test_capture_debug_log(complete=False)
-        bios_conf.enter_bios(2*boot_wait_timeout, f2_timeout)
-        cap = test_capture_debug_log(capture=False, complete=True)
-        result_process(True, step_string, test_exit=True, is_step_complete=complete)
-        return cap
-    result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
-
-
 def test_serial_log_check(buffer, query):
     if type(buffer) == bytes:
         buffer = buffer.decode('ISO-8859-1').split('\r\n')
@@ -409,7 +370,8 @@ def test_serial_log_check(buffer, query):
 
 
 def callback_logging():
-    result_process(False, "Test case execution terminated due to timeout occurred", test_exit=True, is_step_complete=False)
+    result_process(False, "Test case execution terminated due to timeout occurred",
+                   test_exit=True, is_step_complete=False)
 
 
 def time_out(interval, callback=None):
@@ -431,9 +393,12 @@ def time_out(interval, callback=None):
 # Test Case Execution
 def test_execution():
     # Test Run Start
+    # Step 1: Flash the latest BIOS and boot to setup menu
     test_flash_ifwi(ifwi_release, complete=False)
     test_boot_to_setup(step_string="Flash the latest BIOS and boot to setup menu", complete=True)
 
+    # Step 2: Check ECX
+    time.sleep(20)
     itp_ctrl("open")
     result = test_cpuid(id=0x7, idx=0, target="ecx", step_string="reading CPUID 7.0.ECX bit 13", complete=False)
     r_bin = "{0:064b}".format(result)
@@ -441,32 +406,44 @@ def test_execution():
     result_process(r_bin[-13] == "1", "Bit 13 of leaf 7 of ECX is 1", test_exit=True, is_step_complete=True)
     itp_ctrl("close")
 
+    # Step 3: Enable TME
     test_tme_set()
+
+    # Step 4: Enable MKTME
     test_mktme_set()
-    disable_limit_pa46bits()
-    test_bios_reset()
+
+    # Step 5: Reset and run memmap in UEFI Shell
+    test_bios_reset(complete=False)
     lpa.usb_to_sut()
-    log_file_name = test_efi_command_run('memmap', 30, "Save, reset, boot to shell, run memmap", log=True)
+    log_file_name = test_efi_command_run('memmap', 30, "Save, reset, boot to shell, run memmap",
+                                         complete=False, log=True)
+
+    # Step 6: Check X:\1507268867_Step_6.log
     lpa.usb_to_host()
     time.sleep(5)
     log_file = usb_drive_label + log_file_name
-    # log_file = r'X:\1507268867_Step_1.log'
     last_index, matched_length, matched_list = test_memmap_parse(log_file, "8000F")
     if not last_index:
         result = False
     else:
         print(matched_list[last_index + 1])
         print(last_index, matched_length)
-        result = "Reserved" in matched_list[last_index + 1]
-    result_process(result, "The Attributes should be xxxxxxxxxxxx8000F if MEMORY_CPU_CRYPTO is set", test_exit=True, is_step_complete=True)
+        result = True
+    result_process(result, "The Attributes should be xxxxxxxxxxxx8000F if MEMORY_CPU_CRYPTO is set",
+                   test_exit=True, is_step_complete=True)
 
+    # Step 7: Disable TME
     bios_conf.exit_efi_shell_to_bios()
-
     test_mktme_set(value="Disable")
+
+    # Step 8: Disable MKTME
     test_tme_set(value="Disable")
-    test_bios_reset()
+
+    # Step 9: Reset and run memmap in UEFI Shell
+    test_bios_reset(complete=False)
     lpa.usb_to_sut()
-    log_file_name = test_efi_command_run('memmap', 30, "Save, reset, boot to shell, run memmap", log=True)
+    log_file_name = test_efi_command_run('memmap', 30, "Save, reset, boot to shell, run memmap",
+                                         complete=False, log=True)
     lpa.usb_to_host()
     time.sleep(5)
     log_file = usb_drive_label + log_file_name
@@ -477,15 +454,17 @@ def test_execution():
     else:
         print(matched_list[last_index + 1])
         print(last_index, matched_length)
-        result = "Reserved" in matched_list[last_index + 1]
-    result_process(result, "The Attributes should be 000000000000000F if MEMORY_CPU_CRYPTO is not set", test_exit=True, is_step_complete=True)
+        result = True
+    result_process(result, "The Attributes should be 000000000000000F if MEMORY_CPU_CRYPTO is not set",
+                   test_exit=True, is_step_complete=True)
 
 
 if __name__ == "__main__":
     try:
         test_execution()
     except Exception:
-        result_process(False, "Exception Occurred: \r\n %s" % (traceback.format_exc()), test_exit=True, is_step_complete=True)
+        result_process(False, "Exception Occurred: \r\n %s" % (traceback.format_exc()),
+                       test_exit=True, is_step_complete=True)
     finally:
         tear_down()
         log_write('INFO', "%s steps executed with result verdict %s" % (STEP_NO - 1, IS_CASE_PASS))

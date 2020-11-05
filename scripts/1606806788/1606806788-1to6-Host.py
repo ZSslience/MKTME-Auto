@@ -181,7 +181,8 @@ def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the lates
     if os_state == "windows":
         wh.wmi_os_opt(local=False, os_instruct="shutdown")
     try:
-        lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
+        # lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
+        lfs.flash_bmc(image_for_flash)
         lpa.ac_on(port)
         time.sleep(20)
         log_write('INFO', "IFWI flashed successfully with: %s" % image_for_flash)
@@ -290,16 +291,21 @@ def test_tme_set(value="Enable", step_string="EDKII -> Socket Configuration -> P
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
 
 
-def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Multi-Key Total Memory Encryption (MK-TME): ", complete=True):
+def test_mktme_set(value="Enable",
+                   step_string="EDKII -> Socket Configuration -> Processor Configuration -> "
+                               "Total Memory Encryption Multi-Tenant(TME-MT): ",
+                   complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.bios_opt_drop_down_menu_select('Multikey Total Memory Encryption (MK-TME)', value)
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
+                                 wait_time=opt_wait_time)
+        result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption Multi-Tenant(TME-MT)', value)
         bios_conf.bios_save_changes()
         bios_conf.bios_back_home()
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
 
 
 def test_serial_debug_msg_lvl(value="Maximum", step_string="EDKII Menu ->Platform Configuration->Miscellaneous Configuration->Serial Debug Message Level -> Maximum / Normal", complete=True):
@@ -366,15 +372,20 @@ def time_out(interval, callback=None):
 # Test Case Execution
 def test_execution():
     # Test Run Start
+    # Step 1: Flash IFWI and boot to bios setup
     test_flash_ifwi(ifwi_release, complete=False)
     test_boot_to_setup(step_string="Flash the latest BIOS and boot to setup menu", complete=True)
 
+    # Step 2: Enable TME/MKTME
     test_aesni_set(complete=False)
     test_tme_set(complete=False)
     test_mktme_set(step_string="AES-NI, TME, MKTME Enabled and Save", complete=True)
+
+    # Step 3: set log level and reset
     test_serial_debug_msg_lvl(value="Normal", complete=True)
     result = test_bios_boot_log_cap()
 
+    # Step 4-6: Check MKTME failure keyword in log files
     result = test_serial_log_check(result, "Major Warning Code")
     ret_major_warn_code = []
     ret_minor_warn_code = []
@@ -389,7 +400,8 @@ def test_execution():
     minor_warning_code = minor_warning_code.split(", ")
     print(ret_major_warn_code, major_warning_code)
     result = [_ for _ in ret_major_warn_code if _ in major_warning_code]
-    result_process(len(result) == 0, "Not Major Warning Code observed in serial log", test_exit=False, is_step_complete=True)
+    result_process(len(result) == 0, "Not Major Warning Code observed in serial log",
+                   test_exit=False, is_step_complete=True)
     print(ret_minor_warn_code, minor_warning_code)
     result = [_ for _ in ret_minor_warn_code if _ in minor_warning_code]
     result_process(result, "Minor Warning Code printed in serial log" , test_exit=False, is_step_complete=True)
@@ -399,7 +411,8 @@ if __name__ == "__main__":
     try:
         test_execution()
     except Exception:
-        result_process(False, "Exception Occurred: \r\n %s" % (traceback.format_exc()), test_exit=True, is_step_complete=True)
+        result_process(False, "Exception Occurred: \r\n %s" % (traceback.format_exc()),
+                       test_exit=True, is_step_complete=True)
     finally:
         tear_down()
         log_write('INFO', "%s steps executed with result verdict %s" % (STEP_NO - 1, IS_CASE_PASS))

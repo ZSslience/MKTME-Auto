@@ -4,7 +4,7 @@ import sys
 import time
 import threading
 import traceback
-import pythonsv_icx_handler as itp_sv
+
 from HardwareAbstractionLayer import hal_serial_opt as hso
 from MiddleWare import lib_wmi_handler
 from MiddleWare import lib_flash_server as lfs
@@ -14,7 +14,7 @@ from SoftwareAbstractionLayer import utils
 from SoftwareAbstractionLayer import library
 from SoftwareAbstractionLayer import lib_constants
 
-
+import pythonsv_icx_handler as itp_sv
 # 1507396220 [Pre-Si & Post-Si]Check (MK)TME set up option when system support (MK)TME capability or not.
 # rev.18
 
@@ -166,26 +166,14 @@ def reset_button(timeout=os_boot_timeout):
         return False
 
 
-def os_boot_check(round=1):
-    for i in range(round):
-        try:
-            time.sleep(os_boot_timeout)
-            result = wh.wmi_os_opt(local=False, os_instruct="name")
-            log_write("INFO", "OS boot successfully.")
-            return True
-        except Exception:
-            result = reset_button()
-            if result:
-                log_write("INFO", "OS reset triggered cycle %s" % i)
-    return False
-
-
-def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the latest BIOS and boot to setup menu", complete=True):
+def test_flash_ifwi(image_for_flash, port='COM101',
+                    step_string="Flash the latest BIOS and boot to setup menu",
+                    complete=True):
     os_state = is_boot_state()
     if os_state == "windows":
         wh.wmi_os_opt(local=False, os_instruct="shutdown")
     try:
-        lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
+        lfs.flash_bmc(image_for_flash)
         lpa.ac_on(port)
         time.sleep(20)
         log_write('INFO', "IFWI flashed successfully with: %s" % image_for_flash)
@@ -223,27 +211,13 @@ def test_cpuid(id=0x7, idx=0, target="ecx", step_string="reading CPUID: ", compl
         result_process(False, "%s %s" % (step_string, id), test_exit=True, is_step_complete=complete)
 
 
-def test_get_gv_state(initial_step=False):
-    itp, sv = itp_sv.pythonsv_init()
-    result_process(True, "Initialize ITP environment.", test_exit=True, is_step_complete=initial_step)
-    itp.unlock()
-    itp.forcereconfig()
-    sv.refresh()
-    tme_active = sv.socket0.uncore.memss.mc0.ch0.tme.tme_activate.show()
-    print(tme_active)
-    max_ratio = sv.socket0.pcudata.global_max_ratio_2
-    grtee_ratio = sv.socket0.pcudata.global_guaranteed_ratio_2
-    effect_ratio = sv.socket0.pcudata.global_max_efficiency_ratio_2
-    itp_sv.pythonsv_exit()
-    return max_ratio, grtee_ratio, effect_ratio
-
-
 def test_itp_msr(id=0x982, idx=0, step_string="reading itp.threads.msr MSR: ", complete=False):
     try:
         result = itp.threads[idx].msr(id)
         return result
     except Exception:
-        result_process(False, "%s %s" % (step_string, id), test_exit=True, is_step_complete=complete)
+        result_process(False, "%s %s" % (step_string, id),
+                       test_exit=True, is_step_complete=complete)
 
 
 def test_msr(id=0x35, step_string="reading MSR: ", complete=False):
@@ -251,7 +225,8 @@ def test_msr(id=0x35, step_string="reading MSR: ", complete=False):
         result = msr(id)
         return result
     except Exception:
-        result_process(False, "%s %s" % (step_string, id), test_exit=True, is_step_complete=complete)
+        result_process(False, "%s %s" % (step_string, id),
+                       test_exit=True, is_step_complete=complete)
 
 
 def test_bios_reset(flag=True, step_string="Save, reset, boot to BIOS", complete=True):
@@ -260,73 +235,70 @@ def test_bios_reset(flag=True, step_string="Save, reset, boot to BIOS", complete
         result = bios_conf.reset_to_bios(to_save=flag, wait_timeout=boot_wait_timeout, f2_press_wait=f2_timeout)
         result_process(result, step_string, test_exit=True, is_step_complete=complete)
     else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
 
 
-def test_reset_to_efi(flag=True, step_string="Save, reset, boot to EFI Shell", complete=True):
+def test_aesni_set(value="Enable",
+                   step_string="EDKII -> Socket Configuration -> Processor Configuration -> AES-NI: ",
+                   complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
-        result = bios_conf.reset_to_bios(to_save=flag, wait_timeout=boot_wait_timeout, f2_press_wait=f2_timeout)
-        result_process(result, "Save, reset, boot to BIOS", test_exit=True, is_step_complete=False)
-        fs_drive = bios_conf.enter_efi_shell(volume_alias=usb_drive_alias)
-        return fs_drive
-    else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
-
-
-def test_max_mktme_keys_get(verdict="0x3F", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Max MKTME keys: ", complete=True):
-    boot_state = is_boot_state()
-    if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.get_system_information("Max MKTME Keys")
-        result_process(verdict in result, "%s %s" % (step_string, result), test_exit=True, is_step_complete=complete)
-        return result
-    else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
-        return False
-
-
-def test_aesni_set(value="Enable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> AES-NI: ", complete=True):
-    boot_state = is_boot_state()
-    if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
+                                 wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('AES-NI', value)
         bios_conf.bios_save_changes()
-        result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
+        result_process(result, "%s %s" % (step_string, value),
+                       test_exit=True, is_step_complete=complete)
     else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
 
 
-def test_tme_set(value="Enable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Total Memory Encryption (TME): ", complete=True):
+def test_tme_set(value="Enable",
+                 step_string="EDKII -> Socket Configuration -> Processor Configuration -> "
+                             "Total Memory Encryption (TME): ",
+                 complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
+                                 wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption (TME)', value)
         bios_conf.bios_save_changes()
         time.sleep(5)
         bios_conf.bios_back_home()
-        result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
+        result_process(result, "%s %s" % (step_string, value),
+                       test_exit=True, is_step_complete=complete)
     else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
 
 
-def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Multi-Key Total Memory Encryption (MK-TME): ", complete=True):
+def test_mktme_set(value="Enable",
+                   step_string="EDKII -> Socket Configuration -> Processor Configuration -> "
+                               "Total Memory Encryption Multi-Tenant(TME-MT): ",
+                   complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.bios_opt_drop_down_menu_select('Multikey Total Memory Encryption (MK-TME)', value)
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
+                                 wait_time=opt_wait_time)
+        result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption Multi-Tenant(TME-MT)', value)
         bios_conf.bios_save_changes()
-        time.sleep(5)
         bios_conf.bios_back_home()
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
 
 
-def disable_limit_pa46bits(value="Disable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Limit CPU PA to 46 bits", complete=False):
+def disable_limit_pa46bits(value="Disable",
+                           step_string="EDKII -> Socket Configuration -> Processor Configuration -> "
+                                       "Limit CPU PA to 46 bits",
+                           complete=False):
     boot_state = is_boot_state()
     if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
+                                 wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Limit CPU PA to 46 bits', value)
         bios_conf.bios_save_changes()
         bios_conf.bios_back_home()
@@ -336,83 +308,23 @@ def disable_limit_pa46bits(value="Disable", step_string="EDKII -> Socket Configu
                        is_step_complete=complete)
 
 
-def test_dimm_mngment(value="BIOS Setup", step_string="EDKII -> Socket Configuration -> Memory Configuration -> Memory Dfx Configuration -> DIMM Management: ", complete=True):
-    boot_state = is_boot_state()
-    if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Memory Configuration", "Memory Dfx Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.bios_opt_drop_down_menu_select('DIMM Management', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
-        result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
-    else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
-
-
-def test_mem_app_direct(value="Disable", step_string="EDKII -> Socket Configuration -> Memory Configuration -> Memory Dfx Configuration -> AppDirect: ", complete=True):
-    boot_state = is_boot_state()
-    if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Memory Configuration", "Memory Dfx Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.bios_opt_drop_down_menu_select('AppDirect', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
-        result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
-    else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
-
-
-def test_serial_debug_msg_lvl(value="Maximum", step_string="EDKII Menu ->Platform Configuration->Miscellaneous Configuration->Serial Debug Message Level -> Maximum / Normal", complete=True):
-    # Disable/ Minimum/ Normal/ Maxium/ Auto/ Fixed PCD
-    boot_state = is_boot_state()
-    if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Platform Configuration", "Miscellaneous Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.bios_opt_drop_down_menu_select('Serial Debug Message Level', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
-        result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
-    else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
-
-
-def test_efi_command_run(command, wait_time, step_string, complete=True, log=False):
-    reset_button(1)
-    bios_conf.enter_bios(wait_timeout=boot_wait_timeout, f2_timeout=f2_timeout)
-    fs_drive = bios_conf.enter_efi_shell(volume_alias=usb_drive_alias, time_out=30)
-    print(fs_drive)
-    bios_conf.efi_shell_cmd(fs_drive)
-    if log:
-        log_file_info = TEST_CASE_ID + "_Step_" + str(STEP_NO) + ".log"
-        print(log_file_info)
-        result = bios_conf.efi_shell_cmd(command + " > " + log_file_info, wait_time)
-        result_process(result, step_string, test_exit=True, is_step_complete=complete)
-        return log_file_info
-    else:
-        result = bios_conf.efi_shell_cmd(command, wait_time)
-        result_process(result, step_string, test_exit=True, is_step_complete=complete)
-        print(result)
-        return result
-
-
 def test_check_tme_entry(operate=False):
-    reset_button(1)
-    bios_conf.enter_bios(wait_timeout=boot_wait_timeout, f2_timeout=f2_timeout)
     boot_state = is_boot_state()
     result_string = []
     if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.get_system_information('Multikey Total Memory Encryption (MK-TME)')
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
+                                 wait_time=opt_wait_time)
+        result = bios_conf.get_system_information('Total Memory Encryption Multi-Tenant(TME-MT)')
         if result:
-            result_string.append("Multikey Total Memory Encryption (MK-TME): %s" % result)
+            result_string.append("Total Memory Encryption Multi-Tenant(TME-MT): %s" % result)
         else:
-            result_string.append("Multikey Total Memory Encryption (MK-TME): not appear")
+            result_string.append("Total Memory Encryption Multi-Tenant(TME-MT): not appear")
 
-        result = bios_conf.get_system_information('Max MKTME Keys')
+        result = bios_conf.get_system_information('Max TME-MT Keys')
         if result:
-            result_string.append("Max MKTME Keys: %s" % result)
+            result_string.append("Max TME-MT Keys: %s" % result)
         else:
-            result_string.append("Max MKTME Keys: not appear")
+            result_string.append("Max TME-MT Keys: not appear")
 
         bios_conf.bios_menu_navi(["Processor Dfx Configuration"], wait_time=opt_wait_time)
 
@@ -435,58 +347,12 @@ def test_check_tme_entry(operate=False):
                 result_string.append("TME Exclusion Length Increment value: %s" % result)
         else:
             result_string.append("TME Exclusion Length Increment value: not appear")
-        return(result_string)
-
-
-def test_memmap_parse(log_file, query_string):
-    if os.path.exists(log_file):
-        with open(log_file, 'r', encoding="utf_16_le") as buf:
-            map_data = buf.read()
-        data = map_data.split('\n')
-        search_string = r'(.*) (.*)-(.*) (.*) (.*)'
-        ret_list = list(filter(lambda x: re.match(search_string, x) is not None, data))
-        ret_index = [ret_list.index(i) for i in ret_list if "8000F" in i]
-        return ret_index[-1], len(ret_list), ret_list
-
-
-def test_capture_debug_log(capture=True, complete=True, log_file=None):
-    if capture:
-        hs._imp_port_mngr("open")
-        result_process(True, "Perform Capture of debug log", test_exit=True, is_step_complete=complete)
-    else:
-        result_process(True, "Perform Stop Capture of debug log", test_exit=True, is_step_complete=complete)
-        synced_serial = hs._imp_buffer_sync()
-        print(log_file)
-        if log_file:
-            print("Saving to file")
-            with open(log_file, 'wb') as buf:
-                buf.write(synced_serial)
-                buf.flush()
-                buf.close()
-        return synced_serial
-
-
-def test_bios_boot_log_cap(step_string="Start collecting the serial Logs", complete=True):
-    boot_state = is_boot_state()
-    if boot_state == 'bios':
-        bios_conf.reset_system()
-        test_capture_debug_log(complete=False)
-        bios_conf.enter_bios(2*boot_wait_timeout, f2_timeout)
-        cap = test_capture_debug_log(capture=False, complete=True)
-        result_process(True, step_string, test_exit=True, is_step_complete=complete)
-        return cap
-    result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
-
-
-def test_serial_log_check(buffer, query):
-    if type(buffer) == bytes:
-        buffer = buffer.decode('ISO-8859-1').split('\r\n')
-    matched_list = [_ for _ in buffer if query in _]
-    return matched_list
+        return result_string
 
 
 def callback_logging():
-    result_process(False, "Test case execution terminated due to timeout occurred", test_exit=True, is_step_complete=False)
+    result_process(False, "Test case execution terminated due to timeout occurred",
+                   test_exit=True, is_step_complete=False)
 
 
 def time_out(interval, callback=None):
@@ -508,43 +374,55 @@ def time_out(interval, callback=None):
 # Test Case Execution
 def test_execution():
     # Test Run Start
-    test_flash_ifwi(ifwi_release, complete=False)
+    # Step 1: Flash IFWI and boot
+    # test_flash_ifwi(ifwi_release, complete=False)
     test_boot_to_setup(step_string="Flash the latest BIOS and boot to setup menu")
+
+    # Check CPUID(0x7, 0) and ECX bit 13
+    time.sleep(20)
     itp_ctrl("open")
     result = test_cpuid(id=0x7, idx=0, target="ecx", step_string="reading CPUID 7.0.ECX bit 13", complete=False)
     r_bin = "{0:064b}".format(result)
     log_write('INFO', "Run result is %s" % r_bin)
-    result_process(r_bin[-13] == "1", "Bit 13 of leaf 7 of ECX is 1 if system support TME capable", test_exit=True, is_step_complete=True)
+    result_process(r_bin[-13] == "1",
+                   "Bit 13 of leaf 7 of ECX is 1 if system support TME capable",
+                   test_exit=True, is_step_complete=True)
     itp_ctrl("close")
 
+    # Step 3: Disable TME
     test_tme_set(value="Disable")
+
+    # Step 4: Check TME Exclusion Base and TME Exclusion Base Length
     result = test_check_tme_entry()
     check_length = len([i for i in result if "not appear" in i])
     result_process(check_length == 4, "TME Disable: \n%s" % result, test_exit=False, is_step_complete=True)
 
+    # Step 5: Enable TME and check TME Exclusion Base and TME Exclusion Base Length
     test_tme_set(value="Enable", complete=False)
+    test_bios_reset(complete=False)
     result = test_check_tme_entry()
     check_length = len([i for i in result if "not appear" in i])
     result_process(check_length == 0, "TME Enable: \n%s" % result, test_exit=False, is_step_complete=True)
 
+    # Step 6: Enable MKTME and check TME Exclusion Base and TME Exclusion Base Length
     test_mktme_set(value="Enable", complete=False)
-    disable_limit_pa46bits()
+    test_bios_reset(complete=False)
     result = test_check_tme_entry()
     check_length = len([i for i in result if "not appear" in i])
-    result_process((check_length == 0) and (max_tme_keys in result[1]), "MK-TME Enable: \n%s" % result, test_exit=False, is_step_complete=True)
+    result_process((check_length == 0) and (max_tme_keys in result[1]),
+                   "MK-TME Enable: \n%s" % result,
+                   test_exit=False,
+                   is_step_complete=True)
 
+    # Step 7: Disable MKTME only and
     test_mktme_set(value="Disable", complete=False)
+    test_bios_reset(complete=False)
     result = test_check_tme_entry()
     check_length = len([i for i in result if "not appear" in i])
-    result_process((check_length == 0) and (non_max_tme_keys in result[1]) and ("Disable" in result[0]), "MK-TME Disable: \n%s" % result, test_exit=False, is_step_complete=True)
+    result_process((check_length == 0) and (non_max_tme_keys in result[1]) and ("Disable" in result[0]),
+                   "MK-TME Disable: \n%s" % result, test_exit=False, is_step_complete=True)
 
-    test_dimm_mngment()
-    test_mem_app_direct()
-    result_process(True, "Cold boot to save the changes")
-    result = test_check_tme_entry(operate=True)
-    check_length = len([i for i in result if "not appear" in i])
-    operate_length = len([i for i in result if "operate" in i])    
-    result_process((operate_length == 2), "AppDirect Disable: \n%s" % result, test_exit=False, is_step_complete=True)
+    # Step 8-11: Skipped for Idaville as see https://hsdes.intel.com/appstore/article/#/1507396220
 
 
 if __name__ == "__main__":

@@ -146,7 +146,8 @@ def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the lates
     if os_state == "windows":
         wh.wmi_os_opt(local=False, os_instruct="shutdown")
     try:
-        lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
+        # lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
+        # lfs.flash_bmc(image_for_flash)
         lpa.ac_on(port)
         time.sleep(20)
         log_write('INFO', "IFWI flashed successfully with: %s" % image_for_flash)
@@ -180,18 +181,21 @@ def test_tme_set(value="Enable", step_string="EDKII -> Socket Configuration -> P
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
 
 
-def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> Multi-Key "
-                                               "Total Memory Encryption (MK-TME): ", complete=True):
+def test_mktme_set(value="Enable",
+                   step_string="EDKII -> Socket Configuration -> Processor Configuration -> "
+                               "Total Memory Encryption Multi-Tenant(TME-MT): ",
+                   complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.bios_opt_drop_down_menu_select('Multikey Total Memory Encryption (MK-TME)', value)
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
+                                 wait_time=opt_wait_time)
+        result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption Multi-Tenant(TME-MT)', value)
         bios_conf.bios_save_changes()
-        time.sleep(5)
         bios_conf.bios_back_home()
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
 
 
 def disable_limit_pa46bits(value="Disable", step_string="EDKII -> Socket Configuration -> Processor Configuration -> "
@@ -254,18 +258,19 @@ def test_check_tme_entry(operate=False):
     boot_state = is_boot_state()
     result_string = []
     if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.get_system_information('Multikey Total Memory Encryption (MK-TME)')
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
+                                 wait_time=opt_wait_time)
+        result = bios_conf.get_system_information('Total Memory Encryption Multi-Tenant(TME-MT)')
         if result:
-            result_string.append("Multikey Total Memory Encryption (MK-TME): %s" % result)
+            result_string.append("Total Memory Encryption Multi-Tenant(TME-MT): %s" % result)
         else:
-            result_string.append("Multikey Total Memory Encryption (MK-TME): not appear")
+            result_string.append("Total Memory Encryption Multi-Tenant(TME-MT): not appear")
 
-        result = bios_conf.get_system_information('Max MKTME Keys')
+        result = bios_conf.get_system_information('Max TME-MT Keys')
         if result:
-            result_string.append("Max MKTME Keys: %s" % result)
+            result_string.append("Max TME-MT Keys: %s" % result)
         else:
-            result_string.append("Max MKTME Keys: not appear")
+            result_string.append("Max TME-MT Keys: not appear")
 
         bios_conf.bios_menu_navi(["Processor Dfx Configuration"], wait_time=opt_wait_time)
 
@@ -316,41 +321,42 @@ def test_execution():
     test_flash_ifwi(ifwi_release, complete=False)
     test_boot_to_setup(step_string="Flash the latest BIOS and boot to setup menu", complete=True)
 
-    # Step 2: Enable AES-NI/TME/MKTME
-    test_aesni_set(complete=False)
-    test_tme_set(complete=False)
-    test_mktme_set(complete=False)
-    disable_limit_pa46bits()
-    test_bios_reset()
-
-    # Step 3: Check MSR 0X981
-    itp_ctrl("open")
-    msr_981_core_0 = test_itp_msr(id=0x981, idx=0)
-    msr_981_core_max = test_itp_msr(id=0x981, idx=(max_active_thread - 1))
-    itp_ctrl("close")
-    r_bin = "{0:064b}".format(msr_981_core_0)
-    log_write("INFO", "MSR Info: thread 0 0x981: %s, thread max 0x981: %s, thread 0 binary converted: %s" % (
-        msr_981_core_0, msr_981_core_max, r_bin))
-    result = [msr_981_core_0 == msr_981_core_max, "1" == r_bin[-1], "1" in r_bin[-36:-32], "1" in r_bin[-51:-36]]
-    result_process(False not in result, "Check the value of IA32_TME_CAPABILITY MSR 0x981",
-                   test_exit=True, is_step_complete=True)
-
-    # Step 4: Check MSR 0x982
-    itp_ctrl("open")
-    msr_982_core_0 = test_itp_msr(id=0x982, idx=0)
-    msr_982_core_max = test_itp_msr(id=0x982, idx=(max_active_thread - 1))
-    itp_ctrl("close")
-    r_bin = "{0:064b}".format(msr_982_core_0)
-    log_write("INFO", "MSR Info: thread 0 0x982: %s, thread max 0x982: %s, thread 0 binary converted: %s" % (
-        msr_982_core_0, msr_982_core_max, r_bin))
-    result = [msr_982_core_0 == msr_982_core_max,
-              "1" == r_bin[-1], "1" == r_bin[-2],
-              "0" == r_bin[-3], "1" == r_bin[-4],
-              "1" not in r_bin[-8:-4],
-              "1" in r_bin[-36:-32],
-              "1" == r_bin[-49]]
-    result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982",
-                   test_exit=True, is_step_complete=True)
+    # # Step 2: Enable AES-NI/TME/MKTME
+    # test_aesni_set(complete=False)
+    # test_tme_set(complete=False)
+    # test_mktme_set(complete=False)
+    # # disable_limit_pa46bits()
+    # test_bios_reset()
+    #
+    # # Step 3: Check MSR 0X981
+    time.sleep(20)
+    # itp_ctrl("open")
+    # msr_981_core_0 = test_itp_msr(id=0x981, idx=0)
+    # msr_981_core_max = test_itp_msr(id=0x981, idx=(max_active_thread - 1))
+    # itp_ctrl("close")
+    # r_bin = "{0:064b}".format(msr_981_core_0)
+    # log_write("INFO", "MSR Info: thread 0 0x981: %s, thread max 0x981: %s, thread 0 binary converted: %s" % (
+    #     msr_981_core_0, msr_981_core_max, r_bin))
+    # result = [msr_981_core_0 == msr_981_core_max, "1" == r_bin[-1], "1" in r_bin[-36:-32], "1" in r_bin[-51:-36]]
+    # result_process(False not in result, "Check the value of IA32_TME_CAPABILITY MSR 0x981",
+    #                test_exit=True, is_step_complete=True)
+    #
+    # # Step 4: Check MSR 0x982
+    # itp_ctrl("open")
+    # msr_982_core_0 = test_itp_msr(id=0x982, idx=0)
+    # msr_982_core_max = test_itp_msr(id=0x982, idx=(max_active_thread - 1))
+    # itp_ctrl("close")
+    # r_bin = "{0:064b}".format(msr_982_core_0)
+    # log_write("INFO", "MSR Info: thread 0 0x982: %s, thread max 0x982: %s, thread 0 binary converted: %s" % (
+    #     msr_982_core_0, msr_982_core_max, r_bin))
+    # result = [msr_982_core_0 == msr_982_core_max,
+    #           "1" == r_bin[-1], "1" == r_bin[-2],
+    #           "0" == r_bin[-3], "1" == r_bin[-4],
+    #           "1" not in r_bin[-8:-4],
+    #           "1" in r_bin[-36:-32],
+    #           "1" == r_bin[-49]]
+    # result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982",
+    #                test_exit=True, is_step_complete=True)
 
     # Step 5: Check Max MKTME Keys
     result = test_check_tme_entry()
