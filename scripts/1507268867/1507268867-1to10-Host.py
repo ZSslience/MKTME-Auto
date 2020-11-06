@@ -464,8 +464,8 @@ def test_execution():
         result = False
     else:
         result = True
-        # print(matched_list[last_index + 1])
-        # print(last_index, matched_length)
+        print(matched_list[last_index + 1])
+        print(last_index, matched_length)
         # result = "Reserved" in matched_list[last_index + 1]
     result_process(result, "The Attributes should be xxxxxxxxxxxx8000F if MEMORY_CPU_CRYPTO is set",
                    test_exit=True, is_step_complete=True)
@@ -491,8 +491,8 @@ def test_execution():
         result = False
     else:
         result = True
-        # print(matched_list[last_index + 1])
-        # print(last_index, matched_length)
+        print(matched_list[last_index + 1])
+        print(last_index, matched_length)
         # result = "Reserved" in matched_list[last_index + 1]
     result_process(result, "The Attributes should be 000000000000000F if MEMORY_CPU_CRYPTO is not set",
                    test_exit=True, is_step_complete=True)
