@@ -10,7 +10,7 @@ from MiddleWare import lib_flash_server as lfs
 from MiddleWare import lib_power_action_soundwave as lpa
 from MiddleWare.lib_bios_config import BiosMenuConfig
 
-import pythonsv_icx_handler as itp_sv
+# import pythonsv_icx_handler as itp_sv
 
 
 STEP_NO = 1
