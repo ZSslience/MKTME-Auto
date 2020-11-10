@@ -329,7 +329,7 @@ def time_out(interval, callback=None):
     return decorator
 
 
-@time_out(1800, callback_logging)
+@time_out(3600, callback_logging)
 def test_execution():
     # Step 1: Flash BIOS IFWI and reset
     test_flash_ifwi(ifwi_release, complete=False)
