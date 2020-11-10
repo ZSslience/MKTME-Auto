@@ -4,7 +4,7 @@ import threading
 import traceback
 
 # from MiddleWare import lib_wmi_handler
-# from MiddleWare import lib_flash_server as lfs
+from MiddleWare import lib_flash_server as lfs
 from MiddleWare import lib_power_action_soundwave as lpa
 from MiddleWare.lib_bios_config import BiosMenuConfig
 from SoftwareAbstractionLayer import utils
@@ -106,14 +106,14 @@ def is_boot_state():
     #     else:
     #         return "na"
     # except Exception:
-    bios_conf.bios_control_key_press('ESC', 2, 10)
+    bios_conf.bios_control_key_press('ESC', 2, esc_timeout)
     is_efi = bios_conf.efi_shell_cmd("")
     if "Shell>" in is_efi:
         return "efi"
     elif "\\>" in is_efi:
         return "efi_fs"
     else:
-        bios_conf.bios_control_key_press('ESC', 2, 10)
+        bios_conf.bios_control_key_press('ESC', 2, esc_timeout)
         result = bios_conf.bios_back_home()
         if result:
             return "bios"
@@ -171,7 +171,7 @@ def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the lates
     # if os_state == "windows":
     #     wh.wmi_os_opt(local=False, os_instruct="shutdown")
     try:
-        # lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
+        lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
         lpa.ac_on(port)
         time.sleep(20)
         log_write('INFO', "IFWI flashed successfully with: %s" % image_for_flash)
@@ -343,48 +343,66 @@ def test_execution():
     test_mmio_high_base()
     test_bios_reset(complete=False)
 
-    # itp_ctrl("open")
-    # result = test_msr(id=0x35)
-    # itp_ctrl("close")
-    # result = "{0:064b}".format(result)
-    # core_count = int(result[-32:-16], 2)
-    # thread_count = int(result[-16:], 2)
-    # print(result, core_count, thread_count, core_count == logical_cores, thread_count == max_active_thread)
-    # result_process((core_count == logical_cores) and (thread_count == max_active_thread), "Check the number of CPU active logical processor.", test_exit=True, is_step_complete=True)
+    itp_ctrl("open")
+    result = test_msr(id=0x35)
+    itp_ctrl("close")
+    result = "{0:064b}".format(result)
+    core_count = int(result[-32:-16], 2)
+    thread_count = int(result[-16:], 2)
+    print(result, core_count, thread_count, core_count == logical_cores, thread_count == max_active_thread)
+    result_process((core_count == logical_cores) and (thread_count == max_active_thread),
+                   "Check the number of CPU active logical processor.",
+                   test_exit=True, is_step_complete=True)
 
-    # itp_ctrl("open")
-    # msr_981_core_0 = test_itp_msr(id=0x981, idx=0)
-    # msr_981_core_max = test_itp_msr(id=0x981, idx=(max_active_thread-1))
-    # itp_ctrl("close")
-    # r_bin = "{0:064b}".format(msr_981_core_0)
-    # log_write("INFO", "MSR Info: thread 0 0x981: %s, thread max 0x981: %s, thread 0 binary converted: %s" % (msr_981_core_0, msr_981_core_max, r_bin))
-    # # itp.threads[0].msr(0x981) same result withitp.threads[max_thread].msr(0x981)
-    # # Bit 0 of 0x981 must be 1 indicating support for AES-XTS 128 bit encryption algorithm
-    # # Bits [35:32] indicateMK-TME Max Key ID Bits (MK_TME_MAX_KEYID_BITS):
-    # # Number of bits which can be allocated for usage as key identifiers for multi-keymemory encryption.
-    # # If bits [35:32] are zero, MK-TME is not supported, Stop the test execution.
-    # # Bits [50:36] indicates the maximum number of keys that are available for usage. If bits [50:36] are zero, MK-TME is not supported, Stop the test execution
-    # result = [msr_981_core_0 == msr_981_core_max, "1" == r_bin[-1], "1" in r_bin[-36:-32], "1" in r_bin[-51:-36]]
-    # result_process(False not in result, "Check the value of IA32_TME_CAPABILITY MSR 0x981", test_exit=True, is_step_complete=True)
-    #
-    # itp_ctrl("open")
-    # msr_982_core_0 = test_itp_msr(id=0x982, idx=0)
-    # msr_982_core_max = test_itp_msr(id=0x982, idx=(max_active_thread-1))
-    # itp_ctrl("close")
-    # r_bin = "{0:064b}".format(msr_982_core_0)
-    # log_write("INFO", "MSR Info: thread 0 0x982: %s, thread max 0x982: %s, thread 0 binary converted: %s" % (msr_982_core_0, msr_982_core_max, r_bin))
-    # # itp.threads[0].msr(0x982) same result with itp.threads[max_thread].msr(0x982)
-    # # Bit 0 should be 1 indicating Lock being set
-    # # Bit 1 should be 1 indicating TME enabled
-    # # Bit 2 should be 0, indicating a need for creation of new TME key, cold/warm reboot needed.
-    # # Bit 3 should be 1 indicating key is saved into storage
-    # # Bits [7:4] should be 0000, indicating support for 128 bit AES-XTS algorithm
-    # # Bits [35:32] indicate the number of bits that can be allocated for usage as KeyIDs for MK-TME. If bits [35:32] are zero, MK-TME is not supported, Stop the test execution
-    # # Bit 48 should be 1 indicating the crpto algorithm AES 128 shall be used for encryption
-    # result = [msr_982_core_0 == msr_982_core_max, "1" == r_bin[-1], "1" == r_bin[-2], "0" == r_bin[-3], "1" == r_bin[-4], "1" not in r_bin[-8:-4],
-    #           "1" in r_bin[-36:-32], "1" == r_bin[-49]]
-    # result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982", test_exit=True, is_step_complete=True)
-    #
+    itp_ctrl("open")
+    msr_981_core_0 = test_itp_msr(id=0x981, idx=0)
+    msr_981_core_max = test_itp_msr(id=0x981, idx=(max_active_thread-1))
+    itp_ctrl("close")
+    r_bin = "{0:064b}".format(msr_981_core_0)
+    log_write("INFO",
+              "MSR Info: thread 0 0x981: %s, thread max 0x981: %s, thread 0 binary converted: %s" % (
+                  msr_981_core_0, msr_981_core_max, r_bin))
+    # itp.threads[0].msr(0x981) same result withitp.threads[max_thread].msr(0x981)
+    # Bit 0 of 0x981 must be 1 indicating support for AES-XTS 128 bit encryption algorithm
+    # Bits [35:32] indicateMK-TME Max Key ID Bits (MK_TME_MAX_KEYID_BITS):
+    # Number of bits which can be allocated for usage as key identifiers for multi-keymemory encryption.
+    # If bits [35:32] are zero, MK-TME is not supported, Stop the test execution.
+    # Bits [50:36] indicates the maximum number of keys that are available for usage.
+    # If bits [50:36] are zero, MK-TME is not supported, Stop the test execution
+    result = [msr_981_core_0 == msr_981_core_max,
+              "1" == r_bin[-1],
+              "1" in r_bin[-36:-32],
+              "1" in r_bin[-51:-36]]
+    result_process(False not in result,
+                   "Check the value of IA32_TME_CAPABILITY MSR 0x981",
+                   test_exit=True, is_step_complete=True)
+
+    itp_ctrl("open")
+    msr_982_core_0 = test_itp_msr(id=0x982, idx=0)
+    msr_982_core_max = test_itp_msr(id=0x982, idx=(max_active_thread-1))
+    itp_ctrl("close")
+    r_bin = "{0:064b}".format(msr_982_core_0)
+    log_write("INFO",
+              "MSR Info: thread 0 0x982: %s, thread max 0x982: %s, thread 0 binary converted: %s" % (
+                  msr_982_core_0, msr_982_core_max, r_bin))
+    # itp.threads[0].msr(0x982) same result with itp.threads[max_thread].msr(0x982)
+    # Bit 0 should be 1 indicating Lock being set
+    # Bit 1 should be 1 indicating TME enabled
+    # Bit 2 should be 0, indicating a need for creation of new TME key, cold/warm reboot needed.
+    # Bit 3 should be 1 indicating key is saved into storage
+    # Bits [7:4] should be 0000, indicating support for 128 bit AES-XTS algorithm
+    # Bits [35:32] indicate the number of bits that can be allocated for usage as KeyIDs for MK-TME.
+    # If bits [35:32] are zero, MK-TME is not supported, Stop the test execution
+    # Bit 48 should be 1 indicating the crpto algorithm AES 128 shall be used for encryption
+    result = [msr_982_core_0 == msr_982_core_max,
+              "1" == r_bin[-1], "1" == r_bin[-2], "0" == r_bin[-3], "1" == r_bin[-4],
+              "1" not in r_bin[-8:-4],
+              "1" in r_bin[-36:-32],
+              "1" == r_bin[-49]]
+    result_process(False not in result,
+                   "Check the value of IA32_TME_ACTIVATE MSR 0x982",
+                   test_exit=True, is_step_complete=True)
+
     test_max_mktme_keys_get(verdict=max_mktme_keys)
 
 
