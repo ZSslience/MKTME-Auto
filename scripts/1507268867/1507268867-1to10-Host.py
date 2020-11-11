@@ -438,10 +438,11 @@ def test_execution():
     # Step 2: Run cpuid(0x7, 0) and check ECX
     itp_ctrl("open")
     result = test_cpuid(id=0x7, idx=0, target="ecx", step_string="reading CPUID 7.0.ECX bit 13", complete=False)
+    itp_ctrl("close")
     r_bin = "{0:064b}".format(result)
     log_write('INFO', "Run result is %s" % r_bin)
-    result_process(r_bin[-13] == "1", "Bit 13 of leaf 7 of ECX is 1", test_exit=True, is_step_complete=True)
-    itp_ctrl("close")
+    result_process(r_bin[-14] == "1", "Bit 13 of leaf 7 of ECX is 1", test_exit=True, is_step_complete=True)
+
 
     # Step 3: enable TME
     test_tme_set()
