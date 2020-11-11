@@ -19,10 +19,11 @@ TEST_CASE_ID = '1606777649'
 SCRIPT_ID = '1606777649-1to11-Host.py'
 FAIL_COLLECT = []
 
-opt_wait_time = 5
+opt_wait_time = 60
 os_boot_timeout = 120
 boot_wait_timeout = 600
-f2_timeout = 15
+f2_timeout = 120
+esc_timeout = 60
 
 soundwave_port = utils.ReadConfig('SOUNDWAVE', 'PORT')
 ifwi_release = utils.ReadConfig('IFWI_IMAGES', 'RELEASE')
@@ -121,7 +122,6 @@ def bios_init_opr():
         return enter_bios
     elif sut_state == 'windows':
         try:
-            wh.wmi_os_opt(local=False, os_instruct="reboot")
             enter_bios = bios_conf.enter_bios(boot_wait_timeout, f2_timeout)
             return enter_bios
         except Exception:
@@ -214,21 +214,7 @@ def test_directory_mode(step_string="EDKII Menu -> Socket Configuration -> Uncor
                        is_step_complete=complete)
 
 
-def disable_limit_pa46bits(value="Disable",
-                           step_string="EDKII -> Socket Configuration -> Processor Configuration -> Limit CPU PA to "
-                                       "46 bits",
-                           complete=False):
-    boot_state = is_boot_state()
-    if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
-                                 wait_time=opt_wait_time)
-        result = bios_conf.bios_opt_drop_down_menu_select('Limit CPU PA to 46 bits', value)
-        bios_conf.bios_save_changes()
-        bios_conf.bios_back_home()
-        result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
-    else:
-        result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True,
-                       is_step_complete=complete)
+
 
 
 def test_bios_reset(flag=True, step_string="Save, reset, boot to BIOS", complete=True):
@@ -259,9 +245,6 @@ def test_itp_msr(id=0x982, idx=0, step_string="reading itp.threads.msr MSR: ", c
 
 def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the latest BIOS and boot to setup menu",
                     complete=True):
-    os_state = is_boot_state()
-    if os_state == "windows":
-        wh.wmi_os_opt(local=False, os_instruct="shutdown")
     try:
         lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
         lpa.ac_on(port)
@@ -274,7 +257,8 @@ def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the lates
 
 
 def callback_logging():
-    result_process(False, "Test case execution terminated due to timeout occurred", test_exit=True, is_step_complete=False)
+    result_process(False, "Test case execution terminated due to timeout occurred",
+                   test_exit=True, is_step_complete=False)
 
 
 def time_out(interval, callback=None):
@@ -292,7 +276,7 @@ def time_out(interval, callback=None):
     return decorator
 
 
-@time_out(1800, callback_logging)
+@time_out(7200, callback_logging)
 def test_execution():
     # Step1: Flash IFWI and reset
     test_flash_ifwi(ifwi_release, complete=False)
@@ -317,9 +301,6 @@ def test_execution():
 
     # Step 4-5: Enable TME/MKTME
     test_tme_set()
-    # Workaround to make MKTME work from sighting https://hsdes.intel.com/appstore/article/#/1508152249
-    # Not necessary and may be removed in future.
-    disable_limit_pa46bits()
     test_mktme_set()
 
     # Step 6: reset and check directory mode
@@ -406,8 +387,6 @@ def test_execution():
 
 def tear_down():
     sut_state = is_boot_state()
-    if sut_state == "windows":
-        wh.wmi_os_opt(local=False, os_instruct="shutdown")
     log_write("INFO", "Tear Down: SUT is under %s state, perform G3" % sut_state)
     lpa.ac_off(soundwave_port)
     time.sleep(5)

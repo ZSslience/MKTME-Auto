@@ -285,7 +285,7 @@ def time_out(interval, callback=None):
     return decorator
 
 
-@time_out(1800, callback_logging)
+@time_out(3600, callback_logging)
 # Test Case Execution
 def test_execution():
     # Test Run Start
@@ -295,7 +295,7 @@ def test_execution():
     result = test_cpuid(o_id=0x7, idx=0, target="ecx", step_string="reading CPUID 7.0.ECX bit 13", complete=False)
     r_bin = "{0:64b}".format(result)
     log_write('INFO', "Run result is %s" % r_bin)
-    result_process(r_bin[-13] == "0", "Bit 13 of leaf 7 of ECX is 1", test_exit=False, is_step_complete=True)
+    result_process(r_bin[-14] == "0", "Bit 13 of leaf 7 of ECX is 1", test_exit=False, is_step_complete=True)
     itp_ctrl("close")
 
     test_tme_set(negative=True)
