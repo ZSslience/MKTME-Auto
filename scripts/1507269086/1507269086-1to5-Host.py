@@ -5,12 +5,12 @@ import traceback
 from SoftwareAbstractionLayer import utils
 from SoftwareAbstractionLayer import library
 from SoftwareAbstractionLayer import lib_constants
-from MiddleWare import lib_wmi_handler
+# from MiddleWare import lib_wmi_handler
 from MiddleWare import lib_flash_server as lfs
 from MiddleWare import lib_power_action_soundwave as lpa
 from MiddleWare.lib_bios_config import BiosMenuConfig
 
-# import pythonsv_icx_handler as itp_sv
+import pythonsv_icx_handler as itp_sv
 
 
 STEP_NO = 1
@@ -30,7 +30,7 @@ ifwi_release = utils.ReadConfig('IFWI_IMAGES', 'RELEASE')
 logical_cores = int(utils.ReadConfig('1507269086', 'LOGICAL_CORES'))
 max_active_threads = int(utils.ReadConfig('1507269086', 'MAX_ACTIVE_THREADS'))
 max_tme_keys = utils.ReadConfig('1507269086', 'MAX_MKTME_KEYS')
-wh = lib_wmi_handler.WmiHandler()
+# wh = lib_wmi_handler.WmiHandler()
 bios_conf = BiosMenuConfig(TEST_CASE_ID, SCRIPT_ID)
 
 
@@ -143,7 +143,7 @@ def test_boot_to_setup(step_string="Boot to BIOS Menu", complete=True):
 
 def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the latest BIOS and boot to setup menu",
                     complete=True):
-    # os_state = is_boot_state()
+    os_state = is_boot_state()
     # if os_state == "windows":
     #     wh.wmi_os_opt(local=False, os_instruct="shutdown")
     try:
@@ -329,7 +329,7 @@ def time_out(interval, callback=None):
     return decorator
 
 
-@time_out(3600, callback_logging)
+@time_out(7200, callback_logging)
 def test_execution():
     # Step 1: Flash BIOS IFWI and reset
     test_flash_ifwi(ifwi_release, complete=False)
@@ -342,34 +342,34 @@ def test_execution():
     test_mktme_set(complete=False)
     test_bios_reset()
 
-    # # Step 3: Check MSR 0X981
-    # itp_ctrl("open")
-    # msr_981_core_0 = test_itp_msr(id=0x981, idx=0)
-    # msr_981_core_max = test_itp_msr(id=0x981, idx=(max_active_threads - 1))
-    # itp_ctrl("close")
-    # r_bin = "{0:064b}".format(msr_981_core_0)
-    # log_write("INFO", "MSR Info: thread 0 0x981: %s, thread max 0x981: %s, thread 0 binary converted: %s" % (
-    #             msr_981_core_0, msr_981_core_max, r_bin))
-    # result = [msr_981_core_0 == msr_981_core_max, "1" == r_bin[-1], "1" in r_bin[-36:-32], "1" in r_bin[-51:-36]]
-    # result_process(False not in result, "Check the value of IA32_TME_CAPABILITY MSR 0x981",
-    #                test_exit=True, is_step_complete=True)
-    #
-    # # # Step 4: Check MSR 0x982
-    # itp_ctrl("open")
-    # msr_982_core_0 = test_itp_msr(id=0x982, idx=0)
-    # msr_982_core_max = test_itp_msr(id=0x982, idx=(max_active_threads - 1))
-    # itp_ctrl("close")
-    # r_bin = "{0:064b}".format(msr_982_core_0)
-    # log_write("INFO", "MSR Info: thread 0 0x982: %s, thread max 0x982: %s, thread 0 binary converted: %s" % (
-    #     msr_982_core_0, msr_982_core_max, r_bin))
-    # result = [msr_982_core_0 == msr_982_core_max,
-    #           "1" == r_bin[-1], "1" == r_bin[-2],
-    #           "0" == r_bin[-3], "1" == r_bin[-4],
-    #           "1" not in r_bin[-8:-4],
-    #           "1" in r_bin[-36:-32],
-    #           "1" == r_bin[-49]]
-    # result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982",
-    #                test_exit=True, is_step_complete=True)
+    # Step 3: Check MSR 0X981
+    itp_ctrl("open")
+    msr_981_core_0 = test_itp_msr(id=0x981, idx=0)
+    msr_981_core_max = test_itp_msr(id=0x981, idx=(max_active_threads - 1))
+    itp_ctrl("close")
+    r_bin = "{0:064b}".format(msr_981_core_0)
+    log_write("INFO", "MSR Info: thread 0 0x981: %s, thread max 0x981: %s, thread 0 binary converted: %s" % (
+                msr_981_core_0, msr_981_core_max, r_bin))
+    result = [msr_981_core_0 == msr_981_core_max, "1" == r_bin[-1], "1" in r_bin[-36:-32], "1" in r_bin[-51:-36]]
+    result_process(False not in result, "Check the value of IA32_TME_CAPABILITY MSR 0x981",
+                   test_exit=True, is_step_complete=True)
+
+    # # Step 4: Check MSR 0x982
+    itp_ctrl("open")
+    msr_982_core_0 = test_itp_msr(id=0x982, idx=0)
+    msr_982_core_max = test_itp_msr(id=0x982, idx=(max_active_threads - 1))
+    itp_ctrl("close")
+    r_bin = "{0:064b}".format(msr_982_core_0)
+    log_write("INFO", "MSR Info: thread 0 0x982: %s, thread max 0x982: %s, thread 0 binary converted: %s" % (
+        msr_982_core_0, msr_982_core_max, r_bin))
+    result = [msr_982_core_0 == msr_982_core_max,
+              "1" == r_bin[-1], "1" == r_bin[-2],
+              "0" == r_bin[-3], "1" == r_bin[-4],
+              "1" not in r_bin[-8:-4],
+              "1" in r_bin[-36:-32],
+              "1" == r_bin[-49]]
+    result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982",
+                   test_exit=True, is_step_complete=True)
 
     # Step: Setting MMIO High Base: 16T
     test_mmio_high_base()
@@ -385,8 +385,8 @@ def test_execution():
 
 def tear_down():
     sut_state = is_boot_state()
-    if sut_state == "windows":
-        wh.wmi_os_opt(local=False, os_instruct="shutdown")
+    # if sut_state == "windows":
+    #     wh.wmi_os_opt(local=False, os_instruct="shutdown")
     log_write("INFO", "Tear Down: SUT is under %s state, perform G3" % sut_state)
     lpa.ac_off(soundwave_port)
     time.sleep(5)

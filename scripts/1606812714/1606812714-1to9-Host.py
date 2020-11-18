@@ -121,7 +121,6 @@ def is_boot_state():
             return "unknown"
 
 
-
 def tear_down():
     sut_state = is_boot_state()
     # if sut_state == "windows":
@@ -327,17 +326,17 @@ def time_out(interval, callback=None):
     return decorator
 
 
-@time_out(3600, callback_logging)
+@time_out(7200, callback_logging)
 # Test Case Execution
 def test_execution():
     # Test Run Start
     test_flash_ifwi(ifwi_release, complete=False)
     test_boot_to_setup(step_string="Flash the latest BIOS and boot to setup menu", complete=True)
 
-    # test_aesni_set()
+    # test_aesni_set() # Skip as it's default Enable already
     test_tme_set()
 
-    # disable_limit_pa46bits()
+    # disable_limit_pa46bits() # Skip as it's default Disable already
     test_mktme_set()
 
     test_mmio_high_base()

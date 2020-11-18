@@ -19,12 +19,13 @@ IS_CASE_PASS = True
 STEP_NO = 1
 FAIL_COLLECT = []
 
-opt_wait_time = 5
+opt_wait_time = 60
 os_boot_timeout = 120
 boot_wait_timeout = 600
-f2_timeout = 20
+f2_timeout = 120
+esc_timeout = 60
 ifwi_release = utils.ReadConfig('IFWI_IMAGES', 'RELEASE')
-wh = lib_wmi_handler.WmiHandler()
+# wh = lib_wmi_handler.WmiHandler()
 soundwave_port = utils.ReadConfig('SOUNDWAVE', 'PORT')
 bios_conf = BiosMenuConfig(TEST_CASE_ID, SCRIPT_ID)
 
@@ -85,33 +86,33 @@ def log_write(result, info):
 
 
 def is_boot_state():
-    try:
-        result = wh.wmi_os_opt(local=False, os_instruct="name")
-        if "Windows" in result[0]:
-            return "windows"
+    # try:
+    #     result = wh.wmi_os_opt(local=False, os_instruct="name")
+    #     if "Windows" in result[0]:
+    #         return "windows"
+    #     else:
+    #         return "na"
+    # except Exception:
+    bios_conf.bios_control_key_press('ESC', 2, esc_timeout)
+    is_efi = bios_conf.efi_shell_cmd("")
+    if "Shell>" in is_efi:
+        return "efi"
+    elif "\\>" in is_efi:
+        return "efi_fs"
+    else:
+        bios_conf.bios_control_key_press('ESC', 2, esc_timeout)
+        result = bios_conf.bios_back_home()
+        if result:
+            return "bios"
         else:
-            return "na"
-    except Exception:
-        bios_conf.bios_control_key_press('ESC', 2, 3)
-        is_efi = bios_conf.efi_shell_cmd("")
-        if "Shell>" in is_efi:
-            return "efi"
-        elif "\\>" in is_efi:
-            return "efi_fs"
-        else:
-            bios_conf.bios_control_key_press('ESC', 2, 2)
-            result = bios_conf.bios_back_home()
-            if result:
-                return "bios"
-            else:
-                return "unknown"
+            return "unknown"
 
 
 def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the latest BIOS and boot to setup menu",
                     complete=True):
-    os_state = is_boot_state()
-    if os_state == "windows":
-        wh.wmi_os_opt(local=False, os_instruct="shutdown")
+    # os_state = is_boot_state()
+    # if os_state == "windows":
+    #     wh.wmi_os_opt(local=False, os_instruct="shutdown")
     try:
         lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
         lpa.ac_on(port)
@@ -139,7 +140,7 @@ def bios_init_opr():
         return enter_bios
     elif sut_state == 'windows':
         try:
-            wh.wmi_os_opt(local=False, os_instruct="reboot")
+            # wh.wmi_os_opt(local=False, os_instruct="reboot")
             enter_bios = bios_conf.enter_bios(boot_wait_timeout, f2_timeout)
             return enter_bios
         except Exception:
@@ -284,7 +285,7 @@ def callback_logging():
                    is_step_complete=False)
 
 
-@time_out(3600, callback_logging)
+@time_out(7200, callback_logging)
 def test_execution():
     # Test Run Start
     # Step 1:
@@ -292,13 +293,13 @@ def test_execution():
     test_boot_to_setup(step_string="Flash the latest BIOS and boot to setup menu", complete=True)
 
     # Step 2: enable AES-NI
-    test_aesni_set()
+    # test_aesni_set()
 
     # Step 3: enable TME
     test_tme_set()
 
     # Step 4: enable TME-MT
-    disable_limit_pa46bits(complete=False)
+    # disable_limit_pa46bits(complete=False)
     test_mktme_set()
 
     # Save configuration and reset
@@ -329,17 +330,18 @@ def test_execution():
               "0000" == r_bin[-8:-4],
               "1" in r_bin[-36:-32],
               "1" == r_bin[-49],
-              "1" == r_bin[-50]]
+              # "1" == r_bin[-50]
+              ]
     result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982", test_exit=True,
                    is_step_complete=True)
 
 
 def tear_down():
     sut_state = is_boot_state()
-    if sut_state == "windows":
-        wh.wmi_os_opt(local=False, os_instruct="shutdown")
+    # if sut_state == "windows":
+    #     wh.wmi_os_opt(local=False, os_instruct="shutdown")
     log_write("INFO", "SUT is under %s state, perform G3" % sut_state)
-    lpa.ac_off(soundwave_port)
+    # lpa.ac_off(soundwave_port)
     time.sleep(5)
 
 

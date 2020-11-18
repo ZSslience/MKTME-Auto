@@ -2,7 +2,7 @@ import sys
 import time
 import threading
 import traceback
-import pythonsv_icx_handler as itp_sv
+
 from MiddleWare import lib_wmi_handler
 from MiddleWare import lib_flash_server as lfs
 from MiddleWare import lib_power_action_soundwave as lpa
@@ -12,6 +12,7 @@ from SoftwareAbstractionLayer import library
 from SoftwareAbstractionLayer import lib_constants
 
 
+import pythonsv_icx_handler as itp_sv
 # 1606808045 [PostSi & PreSi]To validate Bios write 0 to CORE_MKTME_ACTIVATION to trigger ucode
 # rev.28
 
@@ -150,6 +151,7 @@ def bios_init_opr():
 def test_flash_ifwi(image_for_flash, port='COM101',
                     step_string="Flash the latest BIOS and boot to setup menu",
                     complete=True):
+    os_state = is_boot_state()
     try:
         lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
         lpa.ac_on(port)

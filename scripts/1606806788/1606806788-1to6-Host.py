@@ -145,6 +145,7 @@ def bios_init_opr():
 def test_flash_ifwi(image_for_flash, port='COM101',
                     step_string="Flash the latest BIOS and boot to setup menu",
                     complete=True):
+    os_state = is_boot_state()
     try:
         lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
         lpa.ac_on(port)

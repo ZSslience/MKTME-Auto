@@ -313,7 +313,6 @@ def test_execution():
     lpa.usb_to_host()
     time.sleep(5)
     log_file = usb_drive_label + log_file_name
-    # log_file = r'X:\1507268867_Step_1.log'
     last_index, matched_length, matched_list = test_memmap_parse(log_file, "8000F")
     if not last_index:
         result = False
@@ -340,7 +339,6 @@ def test_execution():
     lpa.usb_to_host()
     time.sleep(5)
     log_file = usb_drive_label + log_file_name
-    # log_file = r'X:\1507268867_Step_1.log'
     last_index, matched_length, matched_list = test_memmap_parse(log_file, "000000000000000F")
     if not last_index:
         result = False
