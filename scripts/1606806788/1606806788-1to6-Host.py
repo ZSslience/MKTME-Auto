@@ -391,12 +391,9 @@ def test_execution():
 
     result = test_serial_log_check(result, "Major Warning Code")
     ret_major_warn_code = []
-    ret_minor_warn_code = []
     for i in result:
         ret_major_warn_code.append(i.split(",")[0].split(" = ")[-1])
-        ret_minor_warn_code.append(i.split(",")[1].split(" = ")[-1])
     ret_major_warn_code = list(dict.fromkeys(ret_major_warn_code))
-    ret_minor_warn_code = list(dict.fromkeys(ret_minor_warn_code))
     major_warning_code = utils.ReadConfig('1606806788', 'MAJOR_WARNING_CODE')
     major_warning_code = major_warning_code.split(", ")
     print(ret_major_warn_code, major_warning_code)
