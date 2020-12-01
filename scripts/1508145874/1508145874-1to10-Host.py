@@ -26,10 +26,10 @@ STEP_NO = 1
 FAIL_COLLECT = []
 
 # Variants Definition
-opt_wait_time = 7
+opt_wait_time = 10
 os_boot_timeout = 120
 boot_wait_timeout = 600
-f2_timeout = 20
+f2_timeout = 30
 sut_host = utils.ReadConfig('SUT_IP', 'target_sut_ip')
 usb_drive_label = utils.ReadConfig('USB Drive', 'DRIVE_LETTER')
 usb_drive_alias = utils.ReadConfig('USB Drive', 'EFI_ALIAS')

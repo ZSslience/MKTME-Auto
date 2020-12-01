@@ -267,27 +267,6 @@ def test_check_tme_entry(operate=False):
         else:
             result_string.append("Max TME-MT Keys: not appear")
 
-        bios_conf.bios_menu_navi(["Processor Dfx Configuration"], wait_time=opt_wait_time)
-
-        result = bios_conf.get_system_information('TME Exclusion Base Address Increment Value')
-        if result:
-            if operate:
-                result = bios_conf.bios_opt_textbox_input('TME Exclusion Base Address Increment Value', "1000")
-                result_string.append("TME Exclusion Base Address Increment Value: operate")
-            else:
-                result_string.append("TME Exclusion Base Address Increment Value: %s" % result)
-        else:
-            result_string.append("TME Exclusion Base Address Increment Value: not appear")
-
-        result = bios_conf.get_system_information('TME Exclusion Length Increment value')
-        if result:
-            if operate:
-                result = bios_conf.bios_opt_textbox_input('TME Exclusion Length Increment value', "0")
-                result_string.append("TME Exclusion Length Increment value: operate")
-            else:
-                result_string.append("TME Exclusion Length Increment value: %s" % result)
-        else:
-            result_string.append("TME Exclusion Length Increment value: not appear")
         return result_string
 
 
