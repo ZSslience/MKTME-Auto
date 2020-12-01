@@ -233,7 +233,7 @@ def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration ->
 
 
 def test_efi_command_run(command, wait_time, step_string, complete=True, log=False):
-    fs_drive = bios_conf.enter_efi_shell(volume_alias=usb_drive_alias, time_out=30)
+    fs_drive = bios_conf.enter_efi_shell(volume_alias=usb_drive_alias, time_out=f2_timeout)
     print(fs_drive)
     bios_conf.efi_shell_cmd(fs_drive)
     if log:

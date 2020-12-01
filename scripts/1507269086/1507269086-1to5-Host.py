@@ -30,6 +30,7 @@ ifwi_release = utils.ReadConfig('IFWI_IMAGES', 'RELEASE')
 logical_cores = int(utils.ReadConfig('1507269086', 'LOGICAL_CORES'))
 max_active_threads = int(utils.ReadConfig('1507269086', 'MAX_ACTIVE_THREADS'))
 max_tme_keys = utils.ReadConfig('1507269086', 'MAX_MKTME_KEYS')
+tme_key_id_bits = utils.ReadConfig('1507269086', 'TME_KEY_ID_BITS')
 # wh = lib_wmi_handler.WmiHandler()
 bios_conf = BiosMenuConfig(TEST_CASE_ID, SCRIPT_ID)
 
@@ -280,33 +281,18 @@ def test_check_tme_entry(operate=False):
         else:
             result_string.append("Total Memory Encryption Multi-Tenant(TME-MT): not appear")
 
-        result = bios_conf.get_system_information('Max TME-MT Keys')
+        result = bios_conf.get_system_information('Key stock amount')
         if result:
-            result_string.append("Max TME-MT Keys: %s" % result)
+            result_string.append("Key stock amount: %s" % result)
         else:
-            result_string.append("Max TME-MT Keys: not appear")
+            result_string.append("Key stock amount: not appear")
 
-        bios_conf.bios_menu_navi(["Processor Dfx Configuration"], wait_time=opt_wait_time)
-
-        result = bios_conf.get_system_information('TME Exclusion Base Address Increment Value')
+        result = bios_conf.get_system_information('TME-MT key ID bits')
         if result:
-            if operate:
-                bios_conf.bios_opt_textbox_input('TME Exclusion Base Address Increment Value', "1000")
-                result_string.append("TME Exclusion Base Address Increment Value: operate")
-            else:
-                result_string.append("TME Exclusion Base Address Increment Value: %s" % result)
+            result_string.append("TME-MT key ID bits: %s" % result)
         else:
-            result_string.append("TME Exclusion Base Address Increment Value: not appear")
+            result_string.append("TME-MT key ID bits: not appear")
 
-        result = bios_conf.get_system_information('TME Exclusion Length Increment value')
-        if result:
-            if operate:
-                result = bios_conf.bios_opt_textbox_input('TME Exclusion Length Increment value', "0")
-                result_string.append("TME Exclusion Length Increment value: operate")
-            else:
-                result_string.append("TME Exclusion Length Increment value: %s" % result)
-        else:
-            result_string.append("TME Exclusion Length Increment value: not appear")
         return result_string
 
 
@@ -378,7 +364,7 @@ def test_execution():
     # Step 6: Check Max TME-MT Keys
     result = test_check_tme_entry()
     check_length = len([i for i in result if "not appear" in i])
-    result_process((check_length == 0) and (max_tme_keys in result[1]),
+    result_process((check_length == 0) and (max_tme_keys in result[1]) and (tme_key_id_bits in result[2]),
                    "TME-MT Enable: \n%s" % result,
                    test_exit=False, is_step_complete=True)
 

@@ -313,7 +313,10 @@ def test_execution():
     itp_ctrl("close")
     r_bin = "{0:064b}".format(msr_981_core_0)
     log_write("INFO", "MSR Info: thread 0 0x981: %s, binary repr: %s" % (msr_981_core_0, r_bin))
-    result = ["1" == r_bin[-1], "1" == r_bin[-2], "1" in r_bin[-36:-32], "1" in r_bin[-51:-36]]
+    result = ["1" == r_bin[-1],
+              "1" == r_bin[-2],
+              "1" in r_bin[-36:-32],
+              "1" in r_bin[-51:-36]]
     result_process(False not in result, "Check the value of IA32_TME_CAPABILITY MSR 0x981", test_exit=True,
                    is_step_complete=True)
 
@@ -330,7 +333,7 @@ def test_execution():
               "0000" == r_bin[-8:-4],
               "1" in r_bin[-36:-32],
               "1" == r_bin[-49],
-              # "1" == r_bin[-50]
+              "1" == r_bin[-50]
               ]
     result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982", test_exit=True,
                    is_step_complete=True)
