@@ -217,13 +217,30 @@ def test_mktme_set(value="Enable",
                        test_exit=True, is_step_complete=complete)
 
 
-def test_mmio_high_base_set(value="16T", step_string="EDKII -> Socket Configuration -> Processor Configuration"
+def test_mktme_mem_integrity_set(value="Enable",
+                                 step_string="EDKII -> Socket Configuration -> Processor Configuration -> "
+                                             "Mktme memory integrity ",
+                                 complete=True):
+    boot_state = is_boot_state()
+    if boot_state == 'bios':
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
+                                 wait_time=opt_wait_time)
+        result = bios_conf.bios_opt_drop_down_menu_select('Mktme memory integrity', value)
+        bios_conf.bios_save_changes()
+        bios_conf.bios_back_home()
+        result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
+    else:
+        result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
+                       test_exit=True, is_step_complete=complete)
+
+
+def test_mmio_high_base_set(value="16T", step_string="EDKII -> Socket Configuration -> "
                                                      "Common RefCode Configuration -> MMIO High Base",
                             complete=True):
     boot_state = is_boot_state()
     if boot_state == 'bios':
-        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration",
-                                  "Common RefCode Configuration"])
+        bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Common RefCode Configuration"],
+                                 wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select("MMIO High Base", value)
         bios_conf.bios_save_changes()
         bios_conf.bios_back_home()
@@ -231,7 +248,6 @@ def test_mmio_high_base_set(value="16T", step_string="EDKII -> Socket Configurat
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state),
                        test_exit=True, is_step_complete=complete)
-
 
 
 def test_bios_reset(flag=True, step_string="Save, reset, boot to BIOS", complete=True):
@@ -293,19 +309,21 @@ def test_execution():
     test_boot_to_setup(step_string="Flash the latest BIOS and boot to setup menu", complete=True)
 
     # Step 2: enable AES-NI
-    # test_aesni_set()
+    # test_aesni_set() # Skip as it's enable by default
 
     # Step 3: enable TME
     test_tme_set()
 
     # Step 4: enable TME-MT
-    # disable_limit_pa46bits(complete=False)
-    test_mktme_set()
+    # disable_limit_pa46bits(complete=False) # Skip as it's Disable by default on EGS Platform
+    test_mktme_set(complete=False)
+    test_mktme_mem_integrity_set()
 
-    # Save configuration and reset
-    test_bios_reset(complete=False)
     # Step 5: MMIO High Base configuration: 16T
     test_mmio_high_base_set()
+
+    # Save configuration and reset
+    test_bios_reset()
 
     # Step 6: Check MSR 0x981
     itp_ctrl("open")
@@ -344,7 +362,7 @@ def tear_down():
     # if sut_state == "windows":
     #     wh.wmi_os_opt(local=False, os_instruct="shutdown")
     log_write("INFO", "SUT is under %s state, perform G3" % sut_state)
-    # lpa.ac_off(soundwave_port)
+    lpa.ac_off(soundwave_port)
     time.sleep(5)
 
 
