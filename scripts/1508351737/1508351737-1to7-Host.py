@@ -304,7 +304,7 @@ def callback_logging():
 @time_out(7200, callback_logging)
 def test_execution():
     # Test Run Start
-    # Step 1:
+    # Step 1: Flash IFWI and boot to BIOS
     test_flash_ifwi(ifwi_release, complete=False)
     test_boot_to_setup(step_string="Flash the latest BIOS and boot to setup menu", complete=True)
 
