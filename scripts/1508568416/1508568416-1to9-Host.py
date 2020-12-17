@@ -13,8 +13,8 @@ from SoftwareAbstractionLayer import utils
 import pythonsv_icx_handler as itp_sv
 
 # Constants Definition
-TEST_CASE_ID = "1508351737"
-SCRIPT_ID = "1508351737-1to-Host.py"
+TEST_CASE_ID = "1508568416"
+SCRIPT_ID = "1508568416-1to-Host.py"
 IS_CASE_PASS = True
 STEP_NO = 1
 FAIL_COLLECT = []
