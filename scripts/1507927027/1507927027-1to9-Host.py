@@ -567,12 +567,14 @@ def test_execution():
     test_tme_set(complete=False)
     disable_limit_pa46bits(complete=False)
     test_mktme_set(complete=False)
+    test_bios_reset(complete=False)
     result_process(True, "Enable TME and MKTME by traveling the follow knobs", test_exit=True, is_step_complete=True)
 
     test_volatile_mem_mode(value="1LM", complete=False)
     test_crdimm_prov(value="create", step_string="Enable CRDIMM AppDirect Mode Provisioning as TME/MK-TME Enabled", complete=True)
     bios_conf.bios_control_key_press('CTRL_ALT_DELETE', times=1, time_out=1)
     result_process(True, "Reboot the system")
+
     test_capture_debug_log(complete=False)
     bios_conf.enter_bios(boot_wait_timeout, f2_timeout)
     tme_en_appdirect_buffer = test_capture_debug_log(complete=False, capture=False, log_file='%s_%s.log' % (TEST_CASE_ID, STEP_NO))
