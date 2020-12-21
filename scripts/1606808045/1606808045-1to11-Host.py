@@ -29,6 +29,7 @@ os_boot_timeout = 120
 boot_wait_timeout = 600
 f2_timeout = 120
 esc_timeout = 60
+save_timeout = 150
 sut_host = utils.ReadConfig('SUT_IP', 'target_sut_ip')
 usb_drive_label = utils.ReadConfig('USB Drive', 'DRIVE_LETTER')
 usb_drive_alias = utils.ReadConfig('USB Drive', 'EFI_ALIAS')
@@ -100,15 +101,15 @@ def log_write(result, info):
 
 
 def is_boot_state():
-    bios_conf.bios_control_key_press('ESC', 2, esc_timeout)
+    bios_conf.bios_control_key_press('ESC', 1, esc_timeout)
     is_efi = bios_conf.efi_shell_cmd("")
     if "Shell>" in is_efi:
         return "efi"
     elif "\\>" in is_efi:
         return "efi_fs"
     else:
-        bios_conf.bios_control_key_press('ESC', 2, esc_timeout)
-        result = bios_conf.bios_back_home()
+        bios_conf.bios_control_key_press('ESC', 1, esc_timeout)
+        result = bios_conf.bios_back_home(wait_time=esc_timeout)
         if result:
             return "bios"
         else:
@@ -117,8 +118,8 @@ def is_boot_state():
 
 def tear_down():
     sut_state = is_boot_state()
-    if sut_state == "windows":
-        wh.wmi_os_opt(local=False, os_instruct="shutdown")
+    # if sut_state == "windows":
+    #     wh.wmi_os_opt(local=False, os_instruct="shutdown")
     log_write("INFO", "Tear Down: SUT is under %s state, perform G3" % sut_state)
     lpa.ac_off(soundwave_port)
     time.sleep(5)
@@ -135,7 +136,7 @@ def bios_init_opr():
         return enter_bios
     elif sut_state == 'windows':
         try:
-            wh.wmi_os_opt(local=False, os_instruct="reboot")
+            # wh.wmi_os_opt(local=False, os_instruct="reboot")
             enter_bios = bios_conf.enter_bios(boot_wait_timeout, f2_timeout)
             return enter_bios
         except Exception:
@@ -151,7 +152,7 @@ def bios_init_opr():
 def test_flash_ifwi(image_for_flash, port='COM101',
                     step_string="Flash the latest BIOS and boot to setup menu",
                     complete=True):
-    os_state = is_boot_state()
+    # os_state = is_boot_state()
     try:
         lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
         lpa.ac_on(port)
@@ -224,7 +225,7 @@ def test_aesni_set(value="Enable", step_string="EDKII -> Socket Configuration ->
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
                                  wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('AES-NI', value)
-        bios_conf.bios_save_changes()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value),
                        test_exit=True, is_step_complete=complete)
     else:
@@ -240,7 +241,7 @@ def test_tme_set(value="Enable", step_string="EDKII -> Socket Configuration -> P
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
                                  wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption (TME)', value)
-        bios_conf.bios_save_changes()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value),
                        test_exit=True, is_step_complete=complete)
     else:
@@ -256,8 +257,7 @@ def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration ->
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
                                  wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption Multi-Tenant(TME-MT)', value)
-        bios_conf.bios_save_changes()
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value),
                        test_exit=True, is_step_complete=complete)
     else:
@@ -294,7 +294,7 @@ def test_execution():
     test_boot_to_setup(step_string="Flash the latest BIOS and boot to setup menu", complete=True)
 
     # Step 2: Enable AES-NI
-    test_aesni_set()
+    # test_aesni_set() # Skip
 
     # Step 3: enable TME
     test_tme_set()

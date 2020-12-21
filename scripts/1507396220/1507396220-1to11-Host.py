@@ -26,10 +26,12 @@ STEP_NO = 1
 FAIL_COLLECT = []
 
 # Variants Definition
-opt_wait_time = 6
+opt_wait_time = 60
 os_boot_timeout = 120
 boot_wait_timeout = 600
-f2_timeout = 15
+f2_timeout = 120
+esc_timeout = 60
+save_timeout = 150
 sut_host = utils.ReadConfig('SUT_IP', 'target_sut_ip')
 usb_drive_label = utils.ReadConfig('USB Drive', 'DRIVE_LETTER')
 usb_drive_alias = utils.ReadConfig('USB Drive', 'EFI_ALIAS')
@@ -37,7 +39,7 @@ ifwi_release = utils.ReadConfig('IFWI_IMAGES', 'RELEASE')
 soundwave_port = utils.ReadConfig('SOUNDWAVE', 'PORT')
 max_tme_keys = utils.ReadConfig('1507396220', 'MAX_MKTME_KEYS')
 non_max_tme_keys = utils.ReadConfig('1507396220', 'NON_MAX_MKTME_KEYS')
-wh = lib_wmi_handler.WmiHandler()
+# wh = lib_wmi_handler.WmiHandler()
 hs = hso.SerialComm()
 bios_conf = BiosMenuConfig(TEST_CASE_ID, SCRIPT_ID)
 
@@ -100,32 +102,32 @@ def log_write(result, info):
 
 
 def is_boot_state():
-    try:
-        result = wh.wmi_os_opt(local=False, os_instruct="name")
-        if "Windows" in result[0]:
-            return "windows"
+    # try:
+    #     result = wh.wmi_os_opt(local=False, os_instruct="name")
+    #     if "Windows" in result[0]:
+    #         return "windows"
+    #     else:
+    #         return "na"
+    # except Exception:
+    bios_conf.bios_control_key_press('ESC', 1, esc_timeout)
+    is_efi = bios_conf.efi_shell_cmd("")
+    if "Shell>" in is_efi:
+        return "efi"
+    elif "\\>" in is_efi:
+        return "efi_fs"
+    else:
+        bios_conf.bios_control_key_press('ESC', 1, esc_timeout)
+        result = bios_conf.bios_back_home(wait_time=save_timeout)
+        if result:
+            return "bios"
         else:
-            return "na"
-    except Exception:
-        bios_conf.bios_control_key_press('ESC', 2, 3)
-        is_efi = bios_conf.efi_shell_cmd("")
-        if "Shell>" in is_efi:
-            return "efi"
-        elif "\\>" in is_efi:
-            return "efi_fs"
-        else:
-            bios_conf.bios_control_key_press('ESC', 2, 2)
-            result = bios_conf.bios_back_home()
-            if result:
-                return "bios"
-            else:
-                return "unknown"
+            return "unknown"
 
 
 def tear_down():
     sut_state = is_boot_state()
-    if sut_state == "windows":
-        wh.wmi_os_opt(local=False, os_instruct="shutdown")
+    # if sut_state == "windows":
+    #     wh.wmi_os_opt(local=False, os_instruct="shutdown")
     log_write("INFO", "Tear Down: SUT is under %s state, perform G3" % sut_state)
     lpa.ac_off(soundwave_port)
     time.sleep(5)
@@ -142,7 +144,7 @@ def bios_init_opr():
         return enter_bios
     elif sut_state == 'windows':
         try:
-            wh.wmi_os_opt(local=False, os_instruct="reboot")
+            # wh.wmi_os_opt(local=False, os_instruct="reboot")
             enter_bios = bios_conf.enter_bios(boot_wait_timeout, f2_timeout)
             return enter_bios
         except Exception:
@@ -170,7 +172,7 @@ def os_boot_check(round=1):
     for i in range(round):
         try:
             time.sleep(os_boot_timeout)
-            result = wh.wmi_os_opt(local=False, os_instruct="name")
+            # result = wh.wmi_os_opt(local=False, os_instruct="name")
             log_write("INFO", "OS boot successfully.")
             return True
         except Exception:
@@ -181,9 +183,9 @@ def os_boot_check(round=1):
 
 
 def test_flash_ifwi(image_for_flash, port='COM101', step_string="Flash the latest BIOS and boot to setup menu", complete=True):
-    os_state = is_boot_state()
-    if os_state == "windows":
-        wh.wmi_os_opt(local=False, os_instruct="shutdown")
+    # os_state = is_boot_state()
+    # if os_state == "windows":
+    #     wh.wmi_os_opt(local=False, os_instruct="shutdown")
     try:
         lfs.flashifwi_em100(binfile=image_for_flash, soundwave_port=port)
         lpa.ac_on(port)
@@ -291,7 +293,7 @@ def test_aesni_set(value="Enable", step_string="EDKII -> Socket Configuration ->
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('AES-NI', value)
-        bios_conf.bios_save_changes()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -302,9 +304,7 @@ def test_tme_set(value="Enable", step_string="EDKII -> Socket Configuration -> P
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption (TME)', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -315,9 +315,7 @@ def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration ->
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption Multi-Tenant(TME-MT)', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -328,8 +326,7 @@ def disable_limit_pa46bits(value="Disable", step_string="EDKII -> Socket Configu
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Limit CPU PA to 46 bits', value)
-        bios_conf.bios_save_changes()
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True,
@@ -341,9 +338,7 @@ def test_dimm_mngment(value="BIOS Setup", step_string="EDKII -> Socket Configura
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Memory Configuration", "Memory Dfx Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('DIMM Management', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -354,9 +349,7 @@ def test_mem_app_direct(value="Disable", step_string="EDKII -> Socket Configurat
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Memory Configuration", "Memory Dfx Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('AppDirect', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -368,9 +361,7 @@ def test_serial_debug_msg_lvl(value="Maximum", step_string="EDKII Menu ->Platfor
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Platform Configuration", "Miscellaneous Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Serial Debug Message Level', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -396,8 +387,8 @@ def test_efi_command_run(command, wait_time, step_string, complete=True, log=Fal
 
 
 def test_check_tme_entry(operate=False):
-    reset_button(1)
-    bios_conf.enter_bios(wait_timeout=boot_wait_timeout, f2_timeout=f2_timeout)
+    # reset_button(1)
+    # bios_conf.enter_bios(wait_timeout=boot_wait_timeout, f2_timeout=f2_timeout)
     boot_state = is_boot_state()
     result_string = []
     if boot_state == 'bios':
@@ -408,11 +399,11 @@ def test_check_tme_entry(operate=False):
         else:
             result_string.append("Total Memory Encryption Multi-Tenant(TME-MT): not appear")
 
-        result = bios_conf.get_system_information('Max TME-MT Keys')
+        result = bios_conf.get_system_information('Key stock amount')
         if result:
-            result_string.append("Max TME-MT Keys: %s" % result)
+            result_string.append("Key stock amount: %s" % result)
         else:
-            result_string.append("Max TME-MT Keys: not appear")
+            result_string.append("Key stock amount: not appear")
 
         bios_conf.bios_menu_navi(["Processor Dfx Configuration"], wait_time=opt_wait_time)
 
@@ -504,7 +495,7 @@ def time_out(interval, callback=None):
     return decorator
 
 
-@time_out(3600, callback_logging)
+@time_out(7200, callback_logging)
 # Test Case Execution
 def test_execution():
     # Test Run Start
@@ -533,10 +524,10 @@ def test_execution():
     check_length = len([i for i in result if "not appear" in i])
     result_process((check_length == 0) and (max_tme_keys in result[1]), "MK-TME Enable: \n%s" % result, test_exit=False, is_step_complete=True)
 
-    test_mktme_set(value="Disable", complete=False)
-    result = test_check_tme_entry()
-    check_length = len([i for i in result if "not appear" in i])
-    result_process((check_length == 0) and (non_max_tme_keys in result[1]) and ("Disable" in result[0]), "MK-TME Disable: \n%s" % result, test_exit=False, is_step_complete=True)
+    #test_mktme_set(value="Disable", complete=False)
+    #result = test_check_tme_entry()
+    #check_length = len([i for i in result if "not appear" in i])
+    #result_process((check_length == 0) and (non_max_tme_keys in result[1]) and ("Disable" in result[0]), "MK-TME Disable: \n%s" % result, test_exit=False, is_step_complete=True)
 
     test_dimm_mngment()
     test_mem_app_direct()

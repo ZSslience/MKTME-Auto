@@ -329,25 +329,25 @@ def test_execution():
     # Step 5-6: Check failure message
     result = test_serial_log_check(result, "Major Warning Code")
     ret_major_warn_code = []
-    ret_minor_warn_code = []
+    # ret_minor_warn_code = []
     for i in result:
         ret_major_warn_code.append(i.split(",")[0].split(" = ")[-1])
-        ret_minor_warn_code.append(i.split(",")[1].split(" = ")[-1])
+        # ret_minor_warn_code.append(i.split(",")[1].split(" = ")[-1])
     ret_major_warn_code = list(dict.fromkeys(ret_major_warn_code))
-    ret_minor_warn_code = list(dict.fromkeys(ret_minor_warn_code))
+    # ret_minor_warn_code = list(dict.fromkeys(ret_minor_warn_code))
     major_warning_code = utils.ReadConfig('1606806788', 'MAJOR_WARNING_CODE')
-    minor_warning_code = utils.ReadConfig('1606806788', 'MINOR_WARNING_CODE')
+    # minor_warning_code = utils.ReadConfig('1606806788', 'MINOR_WARNING_CODE')
     major_warning_code = major_warning_code.split(", ")
-    minor_warning_code = minor_warning_code.split(", ")
+    # minor_warning_code = minor_warning_code.split(", ")
     print(ret_major_warn_code, major_warning_code)
     result = [_ for _ in ret_major_warn_code if _ in major_warning_code]
     result_process(len(result) == 0, "Not Major Warning Code observed in serial log",
                    test_exit=False, is_step_complete=True)
 
-    print(ret_minor_warn_code, minor_warning_code)
-    result = [_ for _ in ret_minor_warn_code if _ in minor_warning_code]
-    result_process(result, "Minor Warning Code printed in serial log" ,
-                   test_exit=False, is_step_complete=True)
+    # print(ret_minor_warn_code, minor_warning_code)
+    # result = [_ for _ in ret_minor_warn_code if _ in minor_warning_code]
+    # result_process(result, "Minor Warning Code printed in serial log" ,
+    #                test_exit=False, is_step_complete=True)
 
 
 if __name__ == "__main__":

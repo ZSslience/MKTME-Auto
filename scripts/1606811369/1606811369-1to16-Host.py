@@ -4,9 +4,9 @@ import sys
 import time
 import threading
 import traceback
-import pythonsv_icx_handler as itp_sv
+
 from HardwareAbstractionLayer import hal_serial_opt as hso
-from MiddleWare import lib_wmi_handler
+# from MiddleWare import lib_wmi_handler
 from MiddleWare import lib_flash_server as lfs
 from MiddleWare import lib_power_action_soundwave as lpa
 from MiddleWare.lib_bios_config import BiosMenuConfig
@@ -14,7 +14,7 @@ from SoftwareAbstractionLayer import utils
 from SoftwareAbstractionLayer import library
 from SoftwareAbstractionLayer import lib_constants
 
-
+import pythonsv_icx_handler as itp_sv
 # 1606811369 [PreSi & PostSi][MKTME] To Check if MKTME is able to exclude addresses.
 # rev.26
 
@@ -31,6 +31,7 @@ os_boot_timeout = 120
 boot_wait_timeout = 600
 f2_timeout = 120
 esc_timeout = 60
+save_timeout = 150
 sut_host = utils.ReadConfig('SUT_IP', 'target_sut_ip')
 usb_drive_label = utils.ReadConfig('USB Drive', 'DRIVE_LETTER')
 usb_drive_alias = utils.ReadConfig('USB Drive', 'EFI_ALIAS')
@@ -38,7 +39,7 @@ ifwi_release = utils.ReadConfig('IFWI_IMAGES', 'RELEASE')
 soundwave_port = utils.ReadConfig('SOUNDWAVE', 'PORT')
 logical_cores = int(utils.ReadConfig('1606811369', 'LOGICAL_CORES'))
 max_active_thread = int(utils.ReadConfig('1606811369', 'MAX_ACTIVE_THREAD'))
-wh = lib_wmi_handler.WmiHandler()
+# wh = lib_wmi_handler.WmiHandler()
 hs = hso.SerialComm()
 bios_conf = BiosMenuConfig(TEST_CASE_ID, SCRIPT_ID)
 
@@ -224,7 +225,7 @@ def test_aesni_set(value="Enable", step_string="EDKII -> Socket Configuration ->
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
                                  wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('AES-NI', value)
-        bios_conf.bios_save_changes()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value),
                        test_exit=True, is_step_complete=complete)
     else:
@@ -239,9 +240,7 @@ def test_tme_set(value="Enable", step_string="EDKII -> Socket Configuration -> P
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption (TME)', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value),
                        test_exit=True, is_step_complete=complete)
     else:
@@ -257,9 +256,7 @@ def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration ->
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
                                  wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption Multi-Tenant(TME-MT)', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value),
                        test_exit=True, is_step_complete=complete)
     else:
@@ -276,9 +273,7 @@ def test_dimm_mngment(value="BIOS Setup", step_string="EDKII -> Socket Configura
                                   "Memory Dfx Configuration"],
                                  wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('DIMM Management', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s: %s" % (step_string, value),
                        test_exit=True, is_step_complete=complete)
     else:
@@ -296,9 +291,7 @@ def test_mem_app_direct(value="Disable",
                                   "Memory Dfx Configuration"],
                                  wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('AppDirect', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s: %s" % (step_string, value),
                        test_exit=True, is_step_complete=complete)
     else:
@@ -314,9 +307,7 @@ def test_tme_addr_set(value="1000", step_string="Providing our own address to be
                                   "Processor Dfx Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_textbox_input('TME Exclusion Base Address Increment Value', value)
         result = bios_conf.bios_opt_textbox_input('TME Exclusion Length Increment value', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s: %s" % (step_string, value),
                        test_exit=True, is_step_complete=complete)
     else:
@@ -330,9 +321,7 @@ def test_volatile_mem_mode(value="1LM", step_string="Set CR DIMMs in the 1LM mod
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Memory Configuration", "Memory Map"],
                                  wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Volatile Memory Mode', value)
-        bios_conf.bios_save_changes()
-        time.sleep(5)
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s: %s" % (step_string, value),
                        test_exit=True, is_step_complete=complete)
     else:

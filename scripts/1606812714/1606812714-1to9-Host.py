@@ -28,6 +28,7 @@ os_boot_timeout = 120
 boot_wait_timeout = 600
 f2_timeout = 120
 esc_timeout = 60
+save_timeout = 150
 sut_host = utils.ReadConfig('SUT_IP', 'target_sut_ip')
 usb_drive_label = utils.ReadConfig('USB Drive', 'DRIVE_LETTER')
 usb_drive_alias = utils.ReadConfig('USB Drive', 'EFI_ALIAS')
@@ -237,7 +238,7 @@ def test_max_mktme_keys_get(verdict="0x3F", step_string="EDKII -> Socket Configu
     boot_state = is_boot_state()
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
-        result = bios_conf.get_system_information("Max TME-MT Keys")
+        result = bios_conf.get_system_information("Key stock amount")
         result_process(verdict in result, "%s %s" % (step_string, result), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -248,7 +249,7 @@ def test_aesni_set(value="Enable", step_string="EDKII -> Socket Configuration ->
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('AES-NI', value)
-        bios_conf.bios_save_changes()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -259,7 +260,7 @@ def test_tme_set(value="Enable", step_string="EDKII -> Socket Configuration -> P
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption (TME)', value)
-        bios_conf.bios_save_changes()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -270,8 +271,7 @@ def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration ->
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption Multi-Tenant(TME-MT)', value)
-        bios_conf.bios_save_changes()
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -285,8 +285,7 @@ def test_mmio_high_base(value="16T",
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Common RefCode Configuration"],
                                  wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('MMIO High Base', value)
-        bios_conf.bios_save_changes()
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value),
                        test_exit=True, is_step_complete=complete)
     else:
@@ -299,8 +298,7 @@ def disable_limit_pa46bits(value="Disable", step_string="EDKII -> Socket Configu
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Limit CPU PA to 46 bits', value)
-        bios_conf.bios_save_changes()
-        bios_conf.bios_back_home()
+        bios_conf.bios_save_changes(wait_time=save_timeout)
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True,
