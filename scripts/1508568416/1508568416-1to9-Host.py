@@ -317,7 +317,7 @@ def test_execution():
     # Step 4: enable TME-MT
     # disable_limit_pa46bits(complete=False) # Skip as it's Disable by default on EGS Platform
     test_mktme_set(complete=False)
-    test_mktme_mem_integrity_set(value="disable")
+    test_mktme_mem_integrity_set(value="Disable")
 
     # Step 5: MMIO High Base configuration: 16T
     test_mmio_high_base_set()
