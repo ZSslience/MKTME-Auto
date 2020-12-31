@@ -10,7 +10,7 @@ from MiddleWare.lib_bios_config import BiosMenuConfig
 from SoftwareAbstractionLayer import utils
 from SoftwareAbstractionLayer import library
 from SoftwareAbstractionLayer import lib_constants
-from . import pythonsv_icx_handler as itp_sv
+import pythonsv_icx_handler as itp_sv
 
 # Constants Definition
 TEST_CASE_ID = "1606827343"
