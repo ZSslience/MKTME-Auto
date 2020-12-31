@@ -26,8 +26,8 @@ f2_timeout = 120
 esc_timeout = 60
 save_timeout = 150
 ifwi_release = utils.ReadConfig('IFWI_IMAGES', 'RELEASE')
-logical_cores = int(utils.ReadConfig('1606808045', 'LOGICAL_CORES'))
-max_active_thread = int(utils.ReadConfig('1606808045', 'MAX_ACTIVE_THREAD'))
+logical_cores = int(utils.ReadConfig('1606827343', 'LOGICAL_CORES'))
+max_active_thread = int(utils.ReadConfig('1606827343', 'MAX_ACTIVE_THREAD'))
 soundwave_port = utils.ReadConfig('SOUNDWAVE', 'PORT')
 bios_conf = BiosMenuConfig(TEST_CASE_ID, SCRIPT_ID)
 
