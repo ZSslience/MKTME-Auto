@@ -268,7 +268,7 @@ def time_out(interval, callback=None):
     return decorator
 
 
-@time_out(7200, callback_logging)
+@time_out(3600, callback_logging)
 # Test Case Execution
 def test_case_execution():
     # flash ifwi and boot to setup
