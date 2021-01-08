@@ -524,10 +524,10 @@ def test_execution():
     check_length = len([i for i in result if "not appear" in i])
     result_process((check_length == 0) and (max_tme_keys in result[1]), "MK-TME Enable: \n%s" % result, test_exit=False, is_step_complete=True)
 
-    #test_mktme_set(value="Disable", complete=False)
-    #result = test_check_tme_entry()
-    #check_length = len([i for i in result if "not appear" in i])
-    #result_process((check_length == 0) and (non_max_tme_keys in result[1]) and ("Disable" in result[0]), "MK-TME Disable: \n%s" % result, test_exit=False, is_step_complete=True)
+    test_mktme_set(value="Disable", complete=False)
+    result = test_check_tme_entry()
+    check_length = len([i for i in result if "not appear" in i])
+    result_process((check_length == 0) and (non_max_tme_keys in result[1]) and ("Disable" in result[0]), "MK-TME Disable: \n%s" % result, test_exit=False, is_step_complete=True)
 
     test_dimm_mngment()
     test_mem_app_direct()
