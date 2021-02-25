@@ -281,7 +281,7 @@ def test_case_execution():
     bios_reset(complete=False)
 
     # check MSR 0x35,0x982,0x982
-    check_msr_val_0x35(0x35)
+    # check_msr_val_0x35(0x35)
     check_msr_value(0x981)
     check_msr_value(0x982)
 
