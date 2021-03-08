@@ -293,7 +293,7 @@ def test_aesni_set(value="Enable", step_string="EDKII -> Socket Configuration ->
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('AES-NI', value)
-        bios_conf.bios_save_changes(wait_time=save_timeout)
+        bios_conf.bios_save_changes()
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -304,7 +304,7 @@ def test_tme_set(value="Enable", step_string="EDKII -> Socket Configuration -> P
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption (TME)', value)
-        bios_conf.bios_save_changes(wait_time=save_timeout)
+        bios_conf.bios_save_changes()
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -315,7 +315,7 @@ def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration ->
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption Multi-Tenant(TME-MT)', value)
-        bios_conf.bios_save_changes(wait_time=save_timeout)
+        bios_conf.bios_save_changes()
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -326,7 +326,7 @@ def disable_limit_pa46bits(value="Disable", step_string="EDKII -> Socket Configu
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Limit CPU PA to 46 bits', value)
-        bios_conf.bios_save_changes(wait_time=save_timeout)
+        bios_conf.bios_save_changes()
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True,
@@ -338,7 +338,7 @@ def test_dimm_mngment(value="BIOS Setup", step_string="EDKII -> Socket Configura
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Memory Configuration", "Memory Dfx Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('DIMM Management', value)
-        bios_conf.bios_save_changes(wait_time=save_timeout)
+        bios_conf.bios_save_changes()
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -349,7 +349,7 @@ def test_mem_app_direct(value="Disable", step_string="EDKII -> Socket Configurat
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Memory Configuration", "Memory Dfx Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('AppDirect', value)
-        bios_conf.bios_save_changes(wait_time=save_timeout)
+        bios_conf.bios_save_changes()
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -361,7 +361,7 @@ def test_serial_debug_msg_lvl(value="Maximum", step_string="EDKII Menu ->Platfor
     if boot_state == 'bios':
         bios_conf.bios_menu_navi(["EDKII Menu", "Platform Configuration", "Miscellaneous Configuration"], wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Serial Debug Message Level', value)
-        bios_conf.bios_save_changes(wait_time=save_timeout)
+        bios_conf.bios_save_changes()
         result_process(result, "%s %s" % (step_string, value), test_exit=True, is_step_complete=complete)
     else:
         result_process(False, "%s: SUT is under %s" % (step_string, boot_state), test_exit=True, is_step_complete=complete)
@@ -543,6 +543,7 @@ if __name__ == "__main__":
         test_execution()
     except Exception:
         result_process(False, "Exception Occurred: \r\n %s" % (traceback.format_exc()), test_exit=True, is_step_complete=True)
+        sys.exit(1)
     finally:
         tear_down()
         log_write('INFO', "%s steps executed with result verdict %s" % (STEP_NO - 1, IS_CASE_PASS))

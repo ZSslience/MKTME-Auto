@@ -225,7 +225,7 @@ def test_aesni_set(value="Enable", step_string="EDKII -> Socket Configuration ->
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
                                  wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('AES-NI', value)
-        bios_conf.bios_save_changes(wait_time=save_timeout)
+        bios_conf.bios_save_changes()
         result_process(result, "%s %s" % (step_string, value),
                        test_exit=True, is_step_complete=complete)
     else:
@@ -241,7 +241,7 @@ def test_tme_set(value="Enable", step_string="EDKII -> Socket Configuration -> P
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
                                  wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption (TME)', value)
-        bios_conf.bios_save_changes(wait_time=save_timeout)
+        bios_conf.bios_save_changes()
         result_process(result, "%s %s" % (step_string, value),
                        test_exit=True, is_step_complete=complete)
     else:
@@ -257,7 +257,7 @@ def test_mktme_set(value="Enable", step_string="EDKII -> Socket Configuration ->
         bios_conf.bios_menu_navi(["EDKII Menu", "Socket Configuration", "Processor Configuration"],
                                  wait_time=opt_wait_time)
         result = bios_conf.bios_opt_drop_down_menu_select('Total Memory Encryption Multi-Tenant(TME-MT)', value)
-        bios_conf.bios_save_changes(wait_time=save_timeout)
+        bios_conf.bios_save_changes()
         result_process(result, "%s %s" % (step_string, value),
                        test_exit=True, is_step_complete=complete)
     else:
