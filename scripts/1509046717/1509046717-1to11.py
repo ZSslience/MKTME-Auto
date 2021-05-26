@@ -256,23 +256,36 @@ def check_msr_value(msr_val, sp):
     msr_core = itp_msr(id=msr_val, idx=0)
     itp_ctrl("close")
     r_bin = "{0:064b}".format(msr_core)
-    log_write("INFO", "MSR Info: thread 0 0x982: %s, thread 0 binary converted: %s" % (
-        msr_core, r_bin))
+    log_write("INFO", "MSR Info: thread 0 %s: %s, thread 0 binary converted: %s" % (
+        msr_val, msr_core, r_bin))
     if sp == "step5":
         result = ["1" == r_bin[-1], "1" == r_bin[-2],
                   "0" == r_bin[-3], "1" == r_bin[-4],
                   "0000" == r_bin[-8:-4],
                   "1" in r_bin[-36:-32],
                   "1" == r_bin[-49], "1" == r_bin[50]]
-        result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982",
+        result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR %s" % msr_val,
                        test_exit=True, is_step_complete=True)
     elif sp == "step6":
         result = ["1" == r_bin[-1]]
-        result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982",
+        result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR %s" % msr_val,
                        test_exit=True, is_step_complete=True)
     elif sp == "step11":
         result = ["1" == r_bin[-1], "1" == r_bin[-2]]
-        result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR 0x982",
+        result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR %s" % msr_val,
+                       test_exit=True, is_step_complete=True)
+    elif sp == "step12":
+        result = ["1" == r_bin[-1], "1" == r_bin[-2],
+                  "0" == r_bin[-3], "1" == r_bin[-4],
+                  "0000" == r_bin[-8:-4],
+                  "1" in r_bin[-32],
+                  "0" in r_bin[-36:-32],
+                  "1" == r_bin[-49], "0" == r_bin[50]]
+        result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR %s" % msr_val,
+                       test_exit=True, is_step_complete=True)
+    elif sp == "step13":
+        result = msr_core != " " and msr_core != 0
+        result_process(False not in result, "Check the value of IA32_TME_ACTIVATE MSR %s" % msr_val,
                        test_exit=True, is_step_complete=True)
 
 
@@ -313,41 +326,43 @@ def test_case_execution():
     # step5:Enable TME bypass and Disable MKTME,Check the value of IA32_TME_ACTIVATE MSR 0x982
     set_bypass()
     mktme_set()
-    check_msr_value(sp="step5")
+    check_msr_value(msr_val="0x982", sp="step5")
     bios_reset(complete=False)
 
     # step6:Enable TME/TME bypass;Disable MKTME;Check the value of IA32_TME_ACTIVATE MSR 0x982
     mktme_set(value="Disable")
-    check_msr_value(sp="")
+    check_msr_value(msr_val="0x982", sp="step12")
+    check_msr_value(msr_val="0x992", sp="step13")
+    check_msr_value(msr_val="0x993", sp="step13")
     bios_reset(complete=False)
 
     # step7:Disable TME;Enable TME bypass;Disable MKTME;Check the value of IA32_TME_ACTIVATE MSR 0x982
     tme_set(value="Disable")
-    check_msr_value(sp="step6")
+    check_msr_value(msr_val="0x982", sp="step6")
     bios_reset(complete=False)
 
     # step8:Disable TME;Enable TME bypass;Enable MKTME;Check the value of IA32_TME_ACTIVATE MSR 0x982
     tme_set()
     mktme_set()
     tme_set(value="Disable")
-    check_msr_value(sp="step6")
+    check_msr_value(msr_val="0x982", sp="step6")
     bios_reset(complete=False)
 
     # step9:Disable TME;Disable TME bypass;Enable MKTME;Check the value of IA32_TME_ACTIVATE MSR 0x982
     tme_set()
     set_bypass(value="Disable")
     tme_set(value="Disable")
-    check_msr_value(sp="step6")
+    check_msr_value(msr_val="0x982", sp="step6")
     bios_reset(complete=False)
 
     # step10:Enable TME;Disable TME bypass;Enable MKTME;Check the value of IA32_TME_ACTIVATE MSR 0x982
     tme_set()
-    check_msr_value(sp="step5")
+    check_msr_value(msr_val="0x982", sp="step5")
     bios_reset(complete=False)
 
     # step11:Enable TME;Disable TME bypass;Disable MKTME;Check the value of IA32_TME_ACTIVATE MSR 0x982
     mktme_set(value="Disable")
-    check_msr_value(sp="step11")
+    check_msr_value(msr_val="0x982", sp="step11")
     bios_reset(complete=False)
 
 
